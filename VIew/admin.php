@@ -1,3 +1,92 @@
+<?php
+
+session_start();
+
+require_once __DIR__ . "/../Model/Database.php";
+require_once __DIR__ . "/../Model/user.php";
+require_once __DIR__ . "/../Model/admin.php";
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
+$database = new Database();
+$db = $database->connect();
+
+$adminId = $_SESSION['user_id'];
+
+$admin = new Admin($db, $adminId);
+
+if (!$admin->isAdmin($adminId)) {
+    header("Location: index.php");
+    exit;
+}
+
+// ===============================
+// KPIs
+// ===============================
+
+$totalSalesQuery = "SELECT COALESCE(SUM(total_amount), 0) AS total_sales 
+                    FROM Orders 
+                    WHERE status != 'Cancelled'";
+$totalSalesStmt = $db->prepare($totalSalesQuery);
+$totalSalesStmt->execute();
+$totalSales = $totalSalesStmt->fetch(PDO::FETCH_ASSOC)['total_sales'];
+
+$ordersQuery = "SELECT COUNT(*) AS total_orders FROM Orders";
+$ordersStmt = $db->prepare($ordersQuery);
+$ordersStmt->execute();
+$totalOrders = $ordersStmt->fetch(PDO::FETCH_ASSOC)['total_orders'];
+
+$usersQuery = "SELECT COUNT(*) AS total_users FROM Users";
+$usersStmt = $db->prepare($usersQuery);
+$usersStmt->execute();
+$totalUsers = $usersStmt->fetch(PDO::FETCH_ASSOC)['total_users'];
+
+$productsQuery = "SELECT COUNT(*) AS total_products FROM Product";
+$productsStmt = $db->prepare($productsQuery);
+$productsStmt->execute();
+$totalProducts = $productsStmt->fetch(PDO::FETCH_ASSOC)['total_products'];
+
+// ===============================
+// Latest Orders
+// ===============================
+
+$latestOrdersQuery = "SELECT 
+                        o.order_id,
+                        o.status,
+                        o.total_amount,
+                        u.first_name,
+                        u.last_name
+                      FROM Orders o
+                      INNER JOIN Users u ON o.user_id = u.user_id
+                      ORDER BY o.order_id DESC
+                      LIMIT 5";
+
+$latestOrdersStmt = $db->prepare($latestOrdersQuery);
+$latestOrdersStmt->execute();
+$latestOrders = $latestOrdersStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// ===============================
+// Low Stock Products
+// ===============================
+
+$lowStockQuery = "SELECT 
+                    product_id,
+                    name,
+                    stock_count
+                  FROM Product
+                  WHERE stock_count <= 5
+                  ORDER BY stock_count ASC
+                  LIMIT 5";
+
+$lowStockStmt = $db->prepare($lowStockQuery);
+$lowStockStmt->execute();
+$lowStockProducts = $lowStockStmt->fetchAll(PDO::FETCH_ASSOC);
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,27 +99,113 @@
 <body>
 
 <header class="header">
-  <a class="logo" href="index.html">Bonna<span>Verse</span></a>
-  <div class="search"><input id="searchInput" placeholder="Search sneakers, apparel, brands..." /></div>
+  <a class="logo" href="index.php">Bonna<span>Verse</span></a>
+
+  <div class="search">
+    <input id="searchInput" placeholder="Search sneakers, apparel, brands..." />
+  </div>
+
   <nav>
-    <a href="shop.html">Shop</a>
-    <a href="wishlist.html">Wishlist</a>
-    <a href="cart.html">Cart</a>
-    <a href="login.html">Login</a>
-    <button class="darkBtn" onclick="toggleDark()">☾</button>
+    <a href="admin.php">Dashboard</a>
+    <a href="admin-products.php">Products</a>
+    <a href="admin-orders.php">Orders</a>
+    <a href="admin-users.php">Users</a>
+    <a href="admin-coupons.php">Coupons</a>
+
+    <form method="POST" action="../Controller/test.php" style="display:inline;">
+      <input type="hidden" name="action" value="logout">
+      <button type="submit" class="darkBtn">Logout</button>
+    </form>
+
+    <button type="button" class="darkBtn" onclick="toggleDark()">☾</button>
   </nav>
 </header>
 
 <main class="container">
 
-<h1>Admin Dashboard</h1><div class="kpis"><div>Total Sales<br><b>$12,450</b></div><div>Orders<br><b>340</b></div><div>Users<br><b>980</b></div><div>Products<br><b>120</b></div></div><section class="panel"><h2>Latest Orders</h2><p>#1024 - Shipped</p><p>#1025 - Processing</p></section><section class="panel"><h2>Low Stock Alerts</h2><p>Jordan 1 Retro High - 2 left</p></section>
+  <h1>Admin Dashboard</h1>
+
+  <div class="kpis">
+    <div>
+      Total Sales<br>
+      <b>$<?php echo number_format($totalSales, 2); ?></b>
+    </div>
+
+    <div>
+      Orders<br>
+      <b><?php echo $totalOrders; ?></b>
+    </div>
+
+    <div>
+      Users<br>
+      <b><?php echo $totalUsers; ?></b>
+    </div>
+
+    <div>
+      Products<br>
+      <b><?php echo $totalProducts; ?></b>
+    </div>
+  </div>
+
+  <section class="panel">
+    <h2>Latest Orders</h2>
+
+    <?php if (!empty($latestOrders)): ?>
+      <?php foreach ($latestOrders as $order): ?>
+        <p>
+          #<?php echo $order['order_id']; ?>
+          -
+          <?php echo htmlspecialchars($order['first_name'] . " " . $order['last_name']); ?>
+          -
+          <?php echo htmlspecialchars($order['status']); ?>
+          -
+          $<?php echo htmlspecialchars($order['total_amount']); ?>
+        </p>
+      <?php endforeach; ?>
+    <?php else: ?>
+      <p>No orders found</p>
+    <?php endif; ?>
+
+    <br>
+    <a href="admin-orders.php" class="btn outline">View All Orders</a>
+  </section>
+
+  <section class="panel">
+    <h2>Low Stock Alerts</h2>
+
+    <?php if (!empty($lowStockProducts)): ?>
+      <?php foreach ($lowStockProducts as $product): ?>
+        <p>
+          <?php echo htmlspecialchars($product['name']); ?>
+          -
+          <?php echo htmlspecialchars($product['stock_count']); ?> left
+        </p>
+      <?php endforeach; ?>
+    <?php else: ?>
+      <p>No low stock products</p>
+    <?php endif; ?>
+
+    <br>
+    <a href="admin-products.php" class="btn outline">Manage Products</a>
+  </section>
 
 </main>
 
 <footer class="footer">
-  <div><b>BonnaVerse</b><p>Simple multi-brand marketplace front-end.</p></div>
-  <div><b>Links</b><p>Shop · Orders · Account · Support</p></div>
-  <div><b>Brands</b><p>Nike · Adidas · Jordan · Supreme · Yeezy</p></div>
+  <div>
+    <b>BonnaVerse</b>
+    <p>Simple multi-brand marketplace front-end.</p>
+  </div>
+
+  <div>
+    <b>Links</b>
+    <p>Shop · Orders · Account · Support</p>
+  </div>
+
+  <div>
+    <b>Brands</b>
+    <p>Nike · Adidas · Jordan · Supreme · Yeezy</p>
+  </div>
 </footer>
 
 <script src="script.js"></script>

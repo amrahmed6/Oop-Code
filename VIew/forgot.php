@@ -1,3 +1,10 @@
+<?php
+session_start();
+
+$message = $_SESSION['forgot_message'] ?? "";
+unset($_SESSION['forgot_message']);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,27 +17,63 @@
 <body>
 
 <header class="header">
-  <a class="logo" href="index.html">Bonna<span>Verse</span></a>
-  <div class="search"><input id="searchInput" placeholder="Search sneakers, apparel, brands..." /></div>
+  <a class="logo" href="index.php">Bonna<span>Verse</span></a>
+
+  <div class="search">
+    <input id="searchInput" placeholder="Search sneakers, apparel, brands..." />
+  </div>
+
   <nav>
-    <a href="shop.html">Shop</a>
-    <a href="wishlist.html">Wishlist</a>
-    <a href="cart.html">Cart</a>
-    <a href="login.html">Login</a>
-    <button class="darkBtn" onclick="toggleDark()">☾</button>
+    <a href="shop.php">Shop</a>
+    <a href="wishlist.php">Wishlist</a>
+    <a href="cart.php">Cart</a>
+    <a href="login.php">Login</a>
+    <button type="button" class="darkBtn" onclick="toggleDark()">☾</button>
   </nav>
 </header>
 
 <main class="container">
 
-<h1>Reset Password</h1><section class="auth panel"><input placeholder="Email"><button class="btn">Send Reset Link</button><p class="ok">Success message will appear here.</p></section>
+  <h1>Reset Password</h1>
+
+  <section class="auth panel">
+    <form method="POST" action="../Controller/test.php">
+      <input type="hidden" name="action" value="forgot_password">
+
+      <input 
+        type="email" 
+        name="email" 
+        placeholder="Email" 
+        required
+      >
+
+      <button type="submit" class="btn">Send Reset Link</button>
+    </form>
+
+    <?php if (!empty($message)): ?>
+      <p class="ok"><?php echo htmlspecialchars($message); ?></p>
+    <?php else: ?>
+      <p class="ok">Success message will appear here.</p>
+    <?php endif; ?>
+  </section>
 
 </main>
 
 <footer class="footer">
-  <div><b>BonnaVerse</b><p>Simple multi-brand marketplace front-end.</p></div>
-  <div><b>Links</b><p>Shop · Orders · Account · Support</p></div>
-  <div><b>Brands</b><p>Nike · Adidas · Jordan · Supreme · Yeezy</p></div>
+  <div>
+    <b>BonnaVerse</b>
+    <p>Simple multi-brand marketplace front-end.</p>
+  </div>
+
+  <div>
+    <b>Links</b>
+    <p>Shop · Orders · Account · Support</p>
+  </div>
+
+  <div>
+    <b>Brands</b>
+    <p>Nike · Adidas · Jordan · Supreme · Yeezy</p>
+  </div>
 </footer>
 
 <script src="script.js"></script>

@@ -1,88 +1,144 @@
-
-const products = [{"id": 1, "name": "Nike Dunk Low Panda", "brand": "Nike", "category": "Sneakers", "price": 145, "rating": 4.8, "img": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=900&auto=format&fit=crop"}, {"id": 2, "name": "Adidas Campus 00s", "brand": "Adidas", "category": "Sneakers", "price": 110, "rating": 4.6, "img": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=900&auto=format&fit=crop"}, {"id": 3, "name": "Supreme Box Logo Hoodie", "brand": "Supreme", "category": "Hoodies", "price": 280, "rating": 4.9, "img": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=900&auto=format&fit=crop"}, {"id": 4, "name": "Essentials Sweatpants", "brand": "Essentials", "category": "Pants", "price": 95, "rating": 4.5, "img": "https://images.unsplash.com/photo-1506629905607-d9d297d3ff98?q=80&w=900&auto=format&fit=crop"}, {"id": 5, "name": "Jordan 1 Retro High", "brand": "Jordan", "category": "Sneakers", "price": 220, "rating": 4.9, "img": "https://images.unsplash.com/photo-1552346154-21d32810aba3?q=80&w=900&auto=format&fit=crop"}, {"id": 6, "name": "Yeezy Slide Bone", "brand": "Yeezy", "category": "Slides", "price": 130, "rating": 4.4, "img": "https://images.unsplash.com/photo-1624006389438-c03488175975?q=80&w=900&auto=format&fit=crop"}, {"id": 7, "name": "Bape Shark Tee", "brand": "Bape", "category": "T-Shirts", "price": 120, "rating": 4.3, "img": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=900&auto=format&fit=crop"}, {"id": 8, "name": "New Balance 550", "brand": "New Balance", "category": "Sneakers", "price": 140, "rating": 4.7, "img": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=900&auto=format&fit=crop"}];
-let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-
-function save() {
-  localStorage.setItem('cart', JSON.stringify(cart));
-  localStorage.setItem('wishlist', JSON.stringify(wishlist));
-}
-
+// ===============================
+// Dark Mode
+// ===============================
 function toggleDark() {
-  document.body.classList.toggle('dark');
-  localStorage.setItem('dark', document.body.classList.contains('dark'));
-}
-if(localStorage.getItem('dark') === 'true') document.body.classList.add('dark');
+  document.body.classList.toggle("dark");
 
-function productCard(p) {
-  return `<div class="card">
-    <a href="product.html"><img src="${p.img}" alt="${p.name}"></a>
-    <p class="muted">${p.brand} · ${p.category}</p>
-    <h3>${p.name}</h3>
-    <p>⭐ ${p.rating} <b style="float:right">$${p.price}</b></p>
-    <button class="btn" onclick="addToCart(${p.id})">Add Cart</button>
-    <button class="btn outline" onclick="addToWishlist(${p.id})">♡</button>
-  </div>`;
+  if (document.body.classList.contains("dark")) {
+    localStorage.setItem("dark", "true");
+  } else {
+    localStorage.setItem("dark", "false");
+  }
 }
 
-function renderProducts() {
-  const grid = document.querySelector('.productGrid');
-  if(!grid) return;
-  let list = [...products];
-  const brand = document.getElementById('brandFilter')?.value.toLowerCase() || '';
-  const cat = document.getElementById('categoryFilter')?.value.toLowerCase() || '';
-  const max = Number(document.getElementById('maxPrice')?.value || 999999);
-  const rating = Number(document.getElementById('minRating')?.value || 0);
-  const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
-  list = list.filter(p => p.brand.toLowerCase().includes(brand) && p.category.toLowerCase().includes(cat) && p.price <= max && p.rating >= rating && p.name.toLowerCase().includes(search));
-  const sort = document.getElementById('sortSelect')?.value;
-  if(sort === 'price') list.sort((a,b)=>a.price-b.price);
-  if(sort === 'name') list.sort((a,b)=>a.name.localeCompare(b.name));
-  if(sort === 'rating') list.sort((a,b)=>b.rating-a.rating);
-  grid.innerHTML = list.map(productCard).join('');
+if (localStorage.getItem("dark") === "true") {
+  document.body.classList.add("dark");
 }
 
-function addToCart(id) {
-  const item = cart.find(x=>x.id===id);
-  if(item) item.qty++;
-  else cart.push({id, qty:1});
-  save(); alert('Added to cart');
+// ===============================
+// Simple Search
+// ===============================
+function setupSearch(inputId) {
+  const input = document.getElementById(inputId);
+
+  if (!input) return;
+
+  input.addEventListener("input", function () {
+    const value = input.value.toLowerCase();
+
+    const cards = document.querySelectorAll(".card");
+    const rows = document.querySelectorAll("table tr");
+
+    if (cards.length > 0) {
+      cards.forEach(function (card) {
+        const text = card.textContent.toLowerCase();
+
+        if (text.includes(value)) {
+          card.style.display = "";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    }
+
+    if (rows.length > 0) {
+      rows.forEach(function (row, index) {
+        if (index === 0) return;
+
+        const text = row.textContent.toLowerCase();
+
+        if (text.includes(value)) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
+      });
+    }
+  });
 }
 
-function addToWishlist(id) {
-  if(!wishlist.includes(id)) wishlist.push(id);
-  save(); alert('Added to wishlist');
+// ===============================
+// Confirm Delete Buttons
+// ===============================
+function setupDeleteConfirm() {
+  const forms = document.querySelectorAll("form");
+
+  forms.forEach(function (form) {
+    form.addEventListener("submit", function (e) {
+      const actionInput = form.querySelector("input[name='action']");
+
+      if (!actionInput) return;
+
+      const action = actionInput.value;
+
+      if (
+        action === "delete_product" ||
+        action === "delete_user" ||
+        action === "delete_coupon" ||
+        action === "remove_cart_item" ||
+        action === "remove_wishlist" ||
+        action === "cancel_order"
+      ) {
+        const ok = confirm("Are you sure?");
+
+        if (!ok) {
+          e.preventDefault();
+        }
+      }
+    });
+  });
 }
 
-function renderCart() {
-  const box = document.getElementById('cartList'); if(!box) return;
-  let total = 0;
-  box.innerHTML = cart.map(item => {
-    const p = products.find(x=>x.id===item.id);
-    total += p.price * item.qty;
-    return `<div class="panel" style="margin-bottom:12px">
-      <b>${p.name}</b><p>$${p.price} x 
-      <input type="number" min="1" value="${item.qty}" style="width:80px" onchange="changeQty(${p.id}, this.value)"> 
-      = $${p.price*item.qty}</p>
-      <button class="btn outline" onclick="removeCart(${p.id})">Delete</button>
-    </div>`;
-  }).join('') || '<div class="panel">Cart is empty.</div>';
-  document.getElementById('subtotal').textContent = '$' + total;
+// ===============================
+// Payment Fields
+// ===============================
+function setupPaymentFields() {
+  const paymentRadios = document.querySelectorAll("input[name='payment_method']");
+  const cardNumber = document.querySelector("input[name='card_number']");
+  const expiryDate = document.querySelector("input[name='expiry_date']");
+  const cvv = document.querySelector("input[name='cvv']");
+
+  if (!paymentRadios.length || !cardNumber || !expiryDate || !cvv) return;
+
+  function toggleCardFields() {
+    const selected = document.querySelector("input[name='payment_method']:checked");
+
+    if (!selected) return;
+
+    if (selected.value === "Visa") {
+      cardNumber.style.display = "";
+      expiryDate.style.display = "";
+      cvv.style.display = "";
+
+      cardNumber.required = true;
+      expiryDate.required = true;
+      cvv.required = true;
+    } else {
+      cardNumber.style.display = "none";
+      expiryDate.style.display = "none";
+      cvv.style.display = "none";
+
+      cardNumber.required = false;
+      expiryDate.required = false;
+      cvv.required = false;
+    }
+  }
+
+  paymentRadios.forEach(function (radio) {
+    radio.addEventListener("change", toggleCardFields);
+  });
+
+  toggleCardFields();
 }
 
-function changeQty(id, qty) {
-  const item = cart.find(x=>x.id===id); if(item) item.qty = Number(qty);
-  save(); renderCart();
-}
-function removeCart(id) { cart = cart.filter(x=>x.id!==id); save(); renderCart(); }
+// ===============================
+// Run
+// ===============================
+document.addEventListener("DOMContentLoaded", function () {
+  setupSearch("searchInput");
+  setupSearch("productSearch");
+  setupSearch("userSearch");
 
-function renderWishlist() {
-  const box = document.getElementById('wishlistList'); if(!box) return;
-  const list = wishlist.map(id=>products.find(p=>p.id===id)).filter(Boolean);
-  box.innerHTML = list.map(p => `<div class="card"><img src="${p.img}"><h3>${p.name}</h3><p>$${p.price}</p><button class="btn" onclick="addToCart(${p.id})">Move to Cart</button><button class="btn outline" onclick="removeWishlist(${p.id})">Remove</button></div>`).join('') || '<div class="panel">Wishlist is empty.</div>';
-}
-function removeWishlist(id) { wishlist = wishlist.filter(x=>x!==id); save(); renderWishlist(); }
-
-document.getElementById('sortSelect')?.addEventListener('change', renderProducts);
-document.getElementById('searchInput')?.addEventListener('input', renderProducts);
-renderProducts(); renderCart(); renderWishlist();
+  setupDeleteConfirm();
+  setupPaymentFields();
+});

@@ -1,3 +1,50 @@
+<?php
+
+session_start();
+
+require_once __DIR__ . "/../Model/Database.php";
+require_once __DIR__ . "/../Model/user.php";
+require_once __DIR__ . "/../Model/admin.php";
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
+$database = new Database();
+$db = $database->connect();
+
+$adminId = $_SESSION['user_id'];
+
+$admin = new Admin($db, $adminId);
+
+if (!$admin->isAdmin($adminId)) {
+    header("Location: index.php");
+    exit;
+}
+
+$query = "SELECT 
+            o.order_id,
+            o.order_date,
+            o.user_id,
+            o.total_amount,
+            o.status,
+            o.discount,
+            o.shipping_cost,
+            o.tracking_number,
+            u.first_name,
+            u.last_name,
+            u.email
+          FROM Orders o
+          INNER JOIN Users u ON o.user_id = u.user_id
+          ORDER BY o.order_id DESC";
+
+$stmt = $db->prepare($query);
+$stmt->execute();
+$orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,27 +57,106 @@
 <body>
 
 <header class="header">
-  <a class="logo" href="index.html">Bonna<span>Verse</span></a>
-  <div class="search"><input id="searchInput" placeholder="Search sneakers, apparel, brands..." /></div>
+  <a class="logo" href="index.php">Bonna<span>Verse</span></a>
+
+  <div class="search">
+    <input id="searchInput" placeholder="Search sneakers, apparel, brands..." />
+  </div>
+
   <nav>
-    <a href="shop.html">Shop</a>
-    <a href="wishlist.html">Wishlist</a>
-    <a href="cart.html">Cart</a>
-    <a href="login.html">Login</a>
+    <a href="admin.php">Dashboard</a>
+    <a href="admin-products.php">Products</a>
+    <a href="admin-orders.php">Orders</a>
+    <a href="admin-users.php">Users</a>
+    <a href="admin-coupons.php">Coupons</a>
+
+    <form method="POST" action="../Controller/test.php" style="display:inline;">
+      <input type="hidden" name="action" value="logout">
+      <button class="darkBtn" type="submit">Logout</button>
+    </form>
+
     <button class="darkBtn" onclick="toggleDark()">☾</button>
   </nav>
 </header>
 
 <main class="container">
 
-<h1>Orders Management</h1><table><tr><th>Order</th><th>Status</th><th>Total</th><th>Actions</th></tr><tr><td>#1024</td><td>Shipped</td><td>$155</td><td>View / Update / Cancel</td></tr></table>
+  <h1>Orders Management</h1>
+
+  <section class="panel">
+    <table>
+      <tr>
+        <th>Order</th>
+        <th>Customer</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Total</th>
+        <th>Tracking</th>
+        <th>Actions</th>
+      </tr>
+
+      <?php if (!empty($orders)): ?>
+        <?php foreach ($orders as $order): ?>
+          <tr>
+            <td>#<?php echo $order['order_id']; ?></td>
+
+            <td>
+              <?php echo htmlspecialchars($order['first_name'] . " " . $order['last_name']); ?>
+              <br>
+              <small><?php echo htmlspecialchars($order['email']); ?></small>
+            </td>
+
+            <td><?php echo htmlspecialchars($order['order_date']); ?></td>
+
+            <td><?php echo htmlspecialchars($order['status']); ?></td>
+
+            <td>$<?php echo htmlspecialchars($order['total_amount']); ?></td>
+
+            <td><?php echo htmlspecialchars($order['tracking_number']); ?></td>
+
+            <td>
+              <form method="POST" action="../Controller/test.php" style="display:inline;">
+                <input type="hidden" name="action" value="update_order_status">
+                <input type="hidden" name="order_id" value="<?php echo $order['order_id']; ?>">
+
+                <select name="status">
+                  <option value="Processing" <?php if ($order['status'] == "Processing") echo "selected"; ?>>Processing</option>
+                  <option value="Shipped" <?php if ($order['status'] == "Shipped") echo "selected"; ?>>Shipped</option>
+                  <option value="Delivered" <?php if ($order['status'] == "Delivered") echo "selected"; ?>>Delivered</option>
+                  <option value="Cancelled" <?php if ($order['status'] == "Cancelled") echo "selected"; ?>>Cancelled</option>
+                </select>
+
+                <button type="submit" class="btn">Update</button>
+              </form>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <tr>
+          <td colspan="7">No orders found</td>
+        </tr>
+      <?php endif; ?>
+
+    </table>
+  </section>
 
 </main>
 
 <footer class="footer">
-  <div><b>BonnaVerse</b><p>Simple multi-brand marketplace front-end.</p></div>
-  <div><b>Links</b><p>Shop · Orders · Account · Support</p></div>
-  <div><b>Brands</b><p>Nike · Adidas · Jordan · Supreme · Yeezy</p></div>
+  <div>
+    <b>BonnaVerse</b>
+    <p>Simple multi-brand marketplace front-end.</p>
+  </div>
+
+  <div>
+    <b>Links</b>
+    <p>Shop · Orders · Account · Support</p>
+  </div>
+
+  <div>
+    <b>Brands</b>
+    <p>Nike · Adidas · Jordan · Supreme · Yeezy</p>
+  </div>
 </footer>
 
 <script src="script.js"></script>

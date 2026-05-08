@@ -1,3 +1,43 @@
+<?php
+
+session_start();
+
+require_once __DIR__ . "/../Model/Database.php";
+require_once __DIR__ . "/../Model/Order.php";
+require_once __DIR__ . "/../Model/Payment.php";
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
+if (!isset($_GET['order_id'])) {
+    header("Location: orders.php");
+    exit;
+}
+
+$database = new Database();
+$db = $database->connect();
+
+$userId = $_SESSION['user_id'];
+$orderId = $_GET['order_id'];
+
+$orderModel = new Order($db, $userId);
+$order = $orderModel->getById($orderId);
+
+if (!$order) {
+    header("Location: orders.php");
+    exit;
+}
+
+$paymentModel = new Payment($db);
+$payment = $paymentModel->getByOrderId($orderId);
+
+$paymentStatus = $payment ? $payment['status'] : "Not Paid";
+$paymentMethod = $payment ? $payment['payment_method'] : "N/A";
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,34 +50,89 @@
 <body>
 
 <header class="header">
-  <a class="logo" href="index.html">Bonna<span>Verse</span></a>
-  <div class="search"><input id="searchInput" placeholder="Search sneakers, apparel, brands..." /></div>
+  <a class="logo" href="index.php">Bonna<span>Verse</span></a>
+
+  <div class="search">
+    <input id="searchInput" placeholder="Search sneakers, apparel, brands..." />
+  </div>
+
   <nav>
-    <a href="shop.html">Shop</a>
-    <a href="wishlist.html">Wishlist</a>
-    <a href="cart.html">Cart</a>
-    <a href="login.html">Login</a>
-    <button class="darkBtn" onclick="toggleDark()">☾</button>
+    <a href="shop.php">Shop</a>
+    <a href="wishlist.php">Wishlist</a>
+    <a href="cart.php">Cart</a>
+    <a href="orders.php">Orders</a>
+    <a href="account.php">Account</a>
+
+    <form method="POST" action="../Controller/test.php" style="display:inline;">
+      <input type="hidden" name="action" value="logout">
+      <button type="submit" class="darkBtn">Logout</button>
+    </form>
+
+    <button type="button" class="darkBtn" onclick="toggleDark()">☾</button>
   </nav>
 </header>
 
 <main class="container">
 
-<section class="success">
-  <h1>Order Confirmed ✅</h1>
-  <p>Order Number: #STX1024</p>
-  <p>Payment Status: Paid</p>
-  <p>Total Amount: $155</p>
-  <a class="btn" href="tracking.html">Track Order</a>
-  <a class="btn outline" href="shop.html">Continue Shopping</a>
-</section>
+  <section class="success">
+    <h1>Order Confirmed ✅</h1>
+
+    <p>
+      Order Number:
+      <b>#<?php echo htmlspecialchars($order['order_id']); ?></b>
+    </p>
+
+    <p>
+      Order Status:
+      <b><?php echo htmlspecialchars($order['status']); ?></b>
+    </p>
+
+    <p>
+      Payment Status:
+      <b><?php echo htmlspecialchars($paymentStatus); ?></b>
+    </p>
+
+    <p>
+      Payment Method:
+      <b><?php echo htmlspecialchars($paymentMethod); ?></b>
+    </p>
+
+    <p>
+      Tracking Number:
+      <b><?php echo htmlspecialchars($order['tracking_number']); ?></b>
+    </p>
+
+    <p>
+      Total Amount:
+      <b>$<?php echo number_format($order['total_amount'], 2); ?></b>
+    </p>
+
+    <a class="btn" href="tracking.php?order_id=<?php echo $order['order_id']; ?>">
+      Track Order
+    </a>
+
+    <a class="btn outline" href="shop.php">
+      Continue Shopping
+    </a>
+  </section>
 
 </main>
 
 <footer class="footer">
-  <div><b>BonnaVerse</b><p>Simple multi-brand marketplace front-end.</p></div>
-  <div><b>Links</b><p>Shop · Orders · Account · Support</p></div>
-  <div><b>Brands</b><p>Nike · Adidas · Jordan · Supreme · Yeezy</p></div>
+  <div>
+    <b>BonnaVerse</b>
+    <p>Simple multi-brand marketplace front-end.</p>
+  </div>
+
+  <div>
+    <b>Links</b>
+    <p>Shop · Orders · Account · Support</p>
+  </div>
+
+  <div>
+    <b>Brands</b>
+    <p>Nike · Adidas · Jordan · Supreme · Yeezy</p>
+  </div>
 </footer>
 
 <script src="script.js"></script>

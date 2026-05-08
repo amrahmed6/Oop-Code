@@ -1,3 +1,22 @@
+<?php
+
+session_start();
+
+if (isset($_SESSION['user_id'])) {
+    if (isset($_SESSION['role']) && $_SESSION['role'] == "admin") {
+        header("Location: admin.php");
+        exit;
+    } else {
+        header("Location: index.php");
+        exit;
+    }
+}
+
+$error = $_SESSION['login_error'] ?? "";
+unset($_SESSION['login_error']);
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,27 +29,78 @@
 <body>
 
 <header class="header">
-  <a class="logo" href="index.html">Bonna<span>Verse</span></a>
-  <div class="search"><input id="searchInput" placeholder="Search sneakers, apparel, brands..." /></div>
+  <a class="logo" href="index.php">Bonna<span>Verse</span></a>
+
+  <div class="search">
+    <input id="searchInput" placeholder="Search sneakers, apparel, brands..." />
+  </div>
+
   <nav>
-    <a href="shop.html">Shop</a>
-    <a href="wishlist.html">Wishlist</a>
-    <a href="cart.html">Cart</a>
-    <a href="login.html">Login</a>
-    <button class="darkBtn" onclick="toggleDark()">☾</button>
+    <a href="shop.php">Shop</a>
+    <a href="wishlist.php">Wishlist</a>
+    <a href="cart.php">Cart</a>
+    <a href="login.php">Login</a>
+    <button type="button" class="darkBtn" onclick="toggleDark()">☾</button>
   </nav>
 </header>
 
 <main class="container">
 
-<h1>Login</h1><section class="auth panel"><input placeholder="Email"><input type="password" placeholder="Password"><label><input type="checkbox"> Remember me</label><button class="btn">Login</button><a href="forgot.html">Forgot password?</a><a href="register.html">Create account</a></section>
+  <h1>Login</h1>
+
+  <section class="auth panel">
+
+    <?php if (!empty($error)): ?>
+      <p class="error"><?php echo htmlspecialchars($error); ?></p>
+    <?php endif; ?>
+
+    <form method="POST" action="../Controller/test.php">
+      <input type="hidden" name="action" value="login">
+
+      <input 
+        type="email" 
+        name="email" 
+        placeholder="Email" 
+        required
+      >
+
+      <input 
+        type="password" 
+        name="password" 
+        placeholder="Password" 
+        required
+      >
+
+      <label>
+        <input type="checkbox" name="remember">
+        Remember me
+      </label>
+
+      <button type="submit" class="btn">Login</button>
+    </form>
+
+    <a href="forgot.php">Forgot password?</a>
+    <a href="register.php">Create account</a>
+
+  </section>
 
 </main>
 
 <footer class="footer">
-  <div><b>BonnaVerse</b><p>Simple multi-brand marketplace front-end.</p></div>
-  <div><b>Links</b><p>Shop · Orders · Account · Support</p></div>
-  <div><b>Brands</b><p>Nike · Adidas · Jordan · Supreme · Yeezy</p></div>
+  <div>
+    <b>BonnaVerse</b>
+    <p>Simple multi-brand marketplace front-end.</p>
+  </div>
+
+  <div>
+    <b>Links</b>
+    <p>Shop · Orders · Account · Support</p>
+  </div>
+
+  <div>
+    <b>Brands</b>
+    <p>Nike · Adidas · Jordan · Supreme · Yeezy</p>
+  </div>
 </footer>
 
 <script src="script.js"></script>

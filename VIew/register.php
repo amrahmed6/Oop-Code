@@ -1,3 +1,17 @@
+<?php
+
+session_start();
+
+if (isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit;
+}
+
+$error = $_SESSION['register_error'] ?? "";
+unset($_SESSION['register_error']);
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,27 +24,114 @@
 <body>
 
 <header class="header">
-  <a class="logo" href="index.html">Bonna<span>Verse</span></a>
-  <div class="search"><input id="searchInput" placeholder="Search sneakers, apparel, brands..." /></div>
+  <a class="logo" href="index.php">Bonna<span>Verse</span></a>
+
+  <div class="search">
+    <input id="searchInput" placeholder="Search sneakers, apparel, brands..." />
+  </div>
+
   <nav>
-    <a href="shop.html">Shop</a>
-    <a href="wishlist.html">Wishlist</a>
-    <a href="cart.html">Cart</a>
-    <a href="login.html">Login</a>
-    <button class="darkBtn" onclick="toggleDark()">☾</button>
+    <a href="shop.php">Shop</a>
+    <a href="wishlist.php">Wishlist</a>
+    <a href="cart.php">Cart</a>
+    <a href="login.php">Login</a>
+    <button type="button" class="darkBtn" onclick="toggleDark()">☾</button>
   </nav>
 </header>
 
 <main class="container">
 
-<h1>Register</h1><section class="auth panel"><input placeholder="First name"><input placeholder="Last name"><input placeholder="Email"><input placeholder="Phone"><input type="password" placeholder="Password"><input type="password" placeholder="Confirm password"><label><input type="checkbox"> I agree to terms</label><button class="btn">Register</button></section>
+  <h1>Register</h1>
+
+  <section class="auth panel">
+
+    <?php if (!empty($error)): ?>
+      <p class="error"><?php echo htmlspecialchars($error); ?></p>
+    <?php endif; ?>
+
+    <form method="POST" action="../Controller/test.php">
+      <input type="hidden" name="action" value="register">
+
+      <input 
+        type="text" 
+        name="first_name" 
+        placeholder="First name" 
+        required
+      >
+
+      <input 
+        type="text" 
+        name="last_name" 
+        placeholder="Last name" 
+        required
+      >
+
+      <input 
+        type="email" 
+        name="email" 
+        placeholder="Email" 
+        required
+      >
+
+      <input 
+        type="text" 
+        name="phone" 
+        placeholder="Phone" 
+        required
+      >
+
+      <input 
+        type="text" 
+        name="delivery_address" 
+        placeholder="Delivery address" 
+        required
+      >
+
+      <input 
+        type="password" 
+        name="password" 
+        placeholder="Password" 
+        required
+      >
+
+      <input 
+        type="password" 
+        name="confirm_password" 
+        placeholder="Confirm password" 
+        required
+      >
+
+      <label>
+        <input type="checkbox" name="terms" required>
+        I agree to terms
+      </label>
+
+      <button type="submit" class="btn">Register</button>
+    </form>
+
+    <br>
+
+    <a href="login.php">Already have an account? Login</a>
+
+  </section>
 
 </main>
 
 <footer class="footer">
-  <div><b>BonnaVerse</b><p>Simple multi-brand marketplace front-end.</p></div>
-  <div><b>Links</b><p>Shop · Orders · Account · Support</p></div>
-  <div><b>Brands</b><p>Nike · Adidas · Jordan · Supreme · Yeezy</p></div>
+  <div>
+    <b>BonnaVerse</b>
+    <p>Simple multi-brand marketplace front-end.</p>
+  </div>
+
+  <div>
+    <b>Links</b>
+    <p>Shop · Orders · Account · Support</p>
+  </div>
+
+  <div>
+    <b>Brands</b>
+    <p>Nike · Adidas · Jordan · Supreme · Yeezy</p>
+  </div>
 </footer>
 
 <script src="script.js"></script>
