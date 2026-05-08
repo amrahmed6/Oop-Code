@@ -121,6 +121,14 @@ class Product {
             ":product_id" => $productId
         ];
 
+        if (isset($data['price']) && (float)$data['price'] < 0) {
+            return false;
+        }
+
+        if (isset($data['stock_count']) && (int)$data['stock_count'] < 0) {
+            return false;
+        }
+
         foreach ($data as $key => $value) {
             if (in_array($key, $allowedFields)) {
                 $fields[] = "$key = :$key";

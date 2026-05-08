@@ -50,6 +50,9 @@ class Cart {
     }
 
     public function addItem($productId, $quantity = 1) {
+        $productId = (int)$productId;
+        $quantity = (int)$quantity;
+
         if ($quantity <= 0) {
             return false;
         }
@@ -122,6 +125,9 @@ class Cart {
     }
 
     public function updateQuantity($cartItemId, $quantity) {
+        $cartItemId = (int)$cartItemId;
+        $quantity = (int)$quantity;
+
         if ($quantity <= 0) {
             return $this->removeItem($cartItemId);
         }
@@ -167,7 +173,10 @@ class Cart {
                     ci.cart_id,
                     ci.product_id,
                     p.name,
+                    p.brand,
+                    p.category,
                     p.image,
+                    p.stock_count,
                     ci.quantity,
                     ci.price,
                     ci.quantity * ci.price AS total
@@ -193,7 +202,7 @@ class Cart {
 
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $result['total'] ?? 0;
+        return $result && $result['total'] !== null ? (float)$result['total'] : 0;
     }
 
     public function applyCoupon($couponCode) {

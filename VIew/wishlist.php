@@ -3,7 +3,7 @@
 session_start();
 
 require_once __DIR__ . "/../Model/Database.php";
-require_once __DIR__ . "/../Model/Wishlist.php";
+require_once __DIR__ . "/../Model/wishlist.php";
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -45,7 +45,11 @@ $items = $wishlistModel->getByUserId($userId);
     <a href="orders.php">Orders</a>
     <a href="account.php">Account</a>
 
-    <form method="POST" action="../Controller/test.php" style="display:inline;">
+    <?php if (isset($_SESSION['role']) && $_SESSION['role'] == "admin"): ?>
+      <a href="admin.php">Admin</a>
+    <?php endif; ?>
+
+    <form method="POST" action="../Controller/test.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>
@@ -100,7 +104,7 @@ $items = $wishlistModel->getByUserId($userId);
           </a>
 
           <?php if ($item['stock_count'] > 0): ?>
-            <form method="POST" action="../controllers/PostController.php" style="display:inline;">
+            <form method="POST" action="../Controller/test.php" class="inline-form">
               <input type="hidden" name="action" value="add_to_cart">
               <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
               <input type="hidden" name="product_id" value="<?php echo $item['product_id']; ?>">
@@ -113,7 +117,7 @@ $items = $wishlistModel->getByUserId($userId);
             <button class="btn" disabled>Out of Stock</button>
           <?php endif; ?>
 
-          <form method="POST" action="../controllers/PostController.php" style="display:inline;">
+          <form method="POST" action="../Controller/test.php" class="inline-form">
             <input type="hidden" name="action" value="remove_wishlist">
             <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
             <input type="hidden" name="product_id" value="<?php echo $item['product_id']; ?>">

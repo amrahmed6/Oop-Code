@@ -3,12 +3,7 @@
 // ===============================
 function toggleDark() {
   document.body.classList.toggle("dark");
-
-  if (document.body.classList.contains("dark")) {
-    localStorage.setItem("dark", "true");
-  } else {
-    localStorage.setItem("dark", "false");
-  }
+  localStorage.setItem("dark", document.body.classList.contains("dark") ? "true" : "false");
 }
 
 if (localStorage.getItem("dark") === "true") {
@@ -20,40 +15,23 @@ if (localStorage.getItem("dark") === "true") {
 // ===============================
 function setupSearch(inputId) {
   const input = document.getElementById(inputId);
-
   if (!input) return;
 
   input.addEventListener("input", function () {
-    const value = input.value.toLowerCase();
+    const value = input.value.trim().toLowerCase();
 
-    const cards = document.querySelectorAll(".card");
-    const rows = document.querySelectorAll("table tr");
+    document.querySelectorAll(".card").forEach(function (card) {
+      const text = card.textContent.toLowerCase();
+      card.style.display = text.includes(value) ? "" : "none";
+    });
 
-    if (cards.length > 0) {
-      cards.forEach(function (card) {
-        const text = card.textContent.toLowerCase();
+    document.querySelectorAll("table tr").forEach(function (row) {
+      // Never hide table header rows.
+      if (row.querySelector("th")) return;
 
-        if (text.includes(value)) {
-          card.style.display = "";
-        } else {
-          card.style.display = "none";
-        }
-      });
-    }
-
-    if (rows.length > 0) {
-      rows.forEach(function (row, index) {
-        if (index === 0) return;
-
-        const text = row.textContent.toLowerCase();
-
-        if (text.includes(value)) {
-          row.style.display = "";
-        } else {
-          row.style.display = "none";
-        }
-      });
-    }
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(value) ? "" : "none";
+    });
   });
 }
 
@@ -66,24 +44,20 @@ function setupDeleteConfirm() {
   forms.forEach(function (form) {
     form.addEventListener("submit", function (e) {
       const actionInput = form.querySelector("input[name='action']");
-
       if (!actionInput) return;
 
-      const action = actionInput.value;
+      const dangerousActions = [
+        "delete_product",
+        "delete_user",
+        "delete_coupon",
+        "remove_cart_item",
+        "remove_wishlist",
+        "cancel_order"
+      ];
 
-      if (
-        action === "delete_product" ||
-        action === "delete_user" ||
-        action === "delete_coupon" ||
-        action === "remove_cart_item" ||
-        action === "remove_wishlist" ||
-        action === "cancel_order"
-      ) {
+      if (dangerousActions.includes(actionInput.value)) {
         const ok = confirm("Are you sure?");
-
-        if (!ok) {
-          e.preventDefault();
-        }
+        if (!ok) e.preventDefault();
       }
     });
   });
@@ -102,26 +76,12 @@ function setupPaymentFields() {
 
   function toggleCardFields() {
     const selected = document.querySelector("input[name='payment_method']:checked");
+    const showCardFields = selected && selected.value === "Visa";
 
-    if (!selected) return;
-
-    if (selected.value === "Visa") {
-      cardNumber.style.display = "";
-      expiryDate.style.display = "";
-      cvv.style.display = "";
-
-      cardNumber.required = true;
-      expiryDate.required = true;
-      cvv.required = true;
-    } else {
-      cardNumber.style.display = "none";
-      expiryDate.style.display = "none";
-      cvv.style.display = "none";
-
-      cardNumber.required = false;
-      expiryDate.required = false;
-      cvv.required = false;
-    }
+    [cardNumber, expiryDate, cvv].forEach(function (field) {
+      field.style.display = showCardFields ? "" : "none";
+      field.required = !!showCardFields;
+    });
   }
 
   paymentRadios.forEach(function (radio) {

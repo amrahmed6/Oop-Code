@@ -98,7 +98,7 @@ if (!empty($_SERVER['QUERY_STRING'])) {
         <a href="admin.php">Admin</a>
       <?php endif; ?>
 
-      <form method="POST" action="../Controller/test.php" style="display:inline;">
+      <form method="POST" action="../Controller/test.php" class="inline-form">
         <input type="hidden" name="action" value="logout">
         <button type="submit" class="darkBtn">Logout</button>
       </form>
@@ -224,7 +224,7 @@ if (!empty($_SERVER['QUERY_STRING'])) {
               <?php if ($isLoggedIn): ?>
 
                 <?php if ($product['stock_count'] > 0): ?>
-                  <form method="POST" action="../Controller/test.php" style="display:inline;">
+                  <form method="POST" action="../Controller/test.php" class="inline-form">
                     <input type="hidden" name="action" value="add_to_cart">
                     <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
                     <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">
@@ -237,7 +237,7 @@ if (!empty($_SERVER['QUERY_STRING'])) {
                   <button class="btn" disabled>Out of Stock</button>
                 <?php endif; ?>
 
-                <form method="POST" action="../Controller/test.php" style="display:inline;">
+                <form method="POST" action="../Controller/test.php" class="inline-form">
                   <input type="hidden" name="action" value="add_wishlist">
                   <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
                   <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">

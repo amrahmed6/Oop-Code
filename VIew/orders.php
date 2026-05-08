@@ -45,7 +45,11 @@ $orders = $orderModel->getUserOrders();
     <a href="orders.php">Orders</a>
     <a href="account.php">Account</a>
 
-    <form method="POST" action="../Controller/test.php" style="display:inline;">
+    <?php if (isset($_SESSION['role']) && $_SESSION['role'] == "admin"): ?>
+      <a href="admin.php">Admin</a>
+    <?php endif; ?>
+
+    <form method="POST" action="../Controller/test.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>
@@ -98,7 +102,7 @@ $orders = $orderModel->getUserOrders();
               </a>
 
               <?php if ($order['status'] == "Processing"): ?>
-                <form method="POST" action="../Controller/test.php" style="display:inline;">
+                <form method="POST" action="../Controller/test.php" class="inline-form">
                   <input type="hidden" name="action" value="cancel_order">
                   <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
                   <input type="hidden" name="order_id" value="<?php echo $order['order_id']; ?>">

@@ -101,12 +101,17 @@ unset($_SESSION['register_error']);
         required
       >
 
-      <label>
+      <label class="policy-check">
         <input type="checkbox" name="terms" required>
-        I agree to terms
+        <span>
+          I agree to the
+          <a href="policies.php#terms" target="_blank" rel="noopener">Terms & Conditions</a>
+          and
+          <a href="policies.php#privacy" target="_blank" rel="noopener">Privacy Policy</a>.
+        </span>
       </label>
 
-      <button type="submit" class="btn">Register</button>
+      <button type="submit" class="btn auth-submit full">Create Account</button>
     </form>
 
     <br>
@@ -125,7 +130,7 @@ unset($_SESSION['register_error']);
 
   <div>
     <b>Links</b>
-    <p>Shop · Orders · Account · Support</p>
+    <p>Shop · Orders · Account · <a href="policies.php">Policies</a></p>
   </div>
 
   <div>

@@ -71,16 +71,21 @@ unset($_SESSION['login_error']);
         required
       >
 
-      <label>
-        <input type="checkbox" name="remember">
-        Remember me
-      </label>
+      <div class="auth-options">
+        <label class="remember-check">
+          <input type="checkbox" name="remember">
+          <span>Remember me</span>
+        </label>
+        <a href="forgot.php">Forgot password?</a>
+      </div>
 
-      <button type="submit" class="btn">Login</button>
+      <button type="submit" class="btn auth-submit full">Login</button>
     </form>
 
-    <a href="forgot.php">Forgot password?</a>
-    <a href="register.php">Create account</a>
+    <div class="auth-switch">
+      <span>New customer?</span>
+      <a href="register.php">Create account</a>
+    </div>
 
   </section>
 
@@ -94,7 +99,7 @@ unset($_SESSION['login_error']);
 
   <div>
     <b>Links</b>
-    <p>Shop · Orders · Account · Support</p>
+    <p>Shop · Orders · Account · <a href="policies.php">Policies</a></p>
   </div>
 
   <div>

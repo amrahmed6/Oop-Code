@@ -53,13 +53,15 @@ $coupons = $couponModel->getAll();
     <a href="admin-orders.php">Orders</a>
     <a href="admin-users.php">Users</a>
     <a href="admin-coupons.php">Coupons</a>
+    <a href="reports.php">Reports</a>
+    <a href="shop.php">Shop</a>
 
-    <form method="POST" action="../Controller/test.php" style="display:inline;">
+    <form method="POST" action="../Controller/test.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
-      <button class="darkBtn" type="submit">Logout</button>
+      <button type="submit" class="darkBtn">Logout</button>
     </form>
 
-    <button class="darkBtn" onclick="toggleDark()">☾</button>
+    <button type="button" class="darkBtn" onclick="toggleDark()">☾</button>
   </nav>
 </header>
 
@@ -104,7 +106,7 @@ $coupons = $couponModel->getAll();
             <td><?php echo htmlspecialchars($coupon['discount']); ?>%</td>
             <td><?php echo htmlspecialchars($coupon['expiry_date']); ?></td>
             <td>
-              <form method="POST" action="../Controller/test.php" style="display:inline;">
+              <form method="POST" action="../Controller/test.php" class="inline-form">
                 <input type="hidden" name="action" value="delete_coupon">
                 <input type="hidden" name="coupon_id" value="<?php echo $coupon['coupon_id']; ?>">
                 <button type="submit" class="btn outline">Delete</button>

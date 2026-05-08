@@ -66,8 +66,10 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <a href="admin-orders.php">Orders</a>
     <a href="admin-users.php">Users</a>
     <a href="admin-coupons.php">Coupons</a>
+    <a href="reports.php">Reports</a>
+    <a href="shop.php">Shop</a>
 
-    <form method="POST" action="../Controller/test.php" style="display:inline;">
+    <form method="POST" action="../Controller/test.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>
@@ -133,13 +135,13 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <?php if ($role == "Customer"): ?>
 
                 <?php if ($status == "Active"): ?>
-                  <form method="POST" action="..//Controller/test.php" style="display:inline;">
+                  <form method="POST" action="../Controller/test.php" class="inline-form">
                     <input type="hidden" name="action" value="block_user">
                     <input type="hidden" name="user_id" value="<?php echo $user['user_id']; ?>">
                     <button type="submit" class="btn outline">Block</button>
                   </form>
                 <?php else: ?>
-                  <form method="POST" action="../controllers/PostController.php" style="display:inline;">
+                  <form method="POST" action="../Controller/test.php" class="inline-form">
                     <input type="hidden" name="action" value="unblock_user">
                     <input type="hidden" name="user_id" value="<?php echo $user['user_id']; ?>">
                     <button type="submit" class="btn outline">Unblock</button>
@@ -149,7 +151,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <?php endif; ?>
 
               <?php if ($user['user_id'] != $adminId): ?>
-                <form method="POST" action="../controllers/PostController.php" style="display:inline;">
+                <form method="POST" action="../Controller/test.php" class="inline-form">
                   <input type="hidden" name="action" value="delete_user">
                   <input type="hidden" name="user_id" value="<?php echo $user['user_id']; ?>">
                   <button type="submit" class="btn outline">Delete</button>

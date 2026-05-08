@@ -16,7 +16,9 @@ class Review {
 
     // Add review
     public function create($productId, $userId, $rating, $comment) {
-        if ($rating < 0 || $rating > 5) {
+        $rating = (float)$rating;
+
+        if ($rating < 1 || $rating > 5) {
             return false;
         }
 
@@ -119,7 +121,9 @@ class Review {
 
     // Update review
     public function update($reviewId, $userId, $rating, $comment) {
-        if ($rating < 0 || $rating > 5) {
+        $rating = (float)$rating;
+
+        if ($rating < 1 || $rating > 5) {
             return false;
         }
 

@@ -26,6 +26,11 @@ if (!$admin->isAdmin($adminId)) {
 
 $productModel = new Product($db);
 $products = $productModel->getAll();
+$editProduct = null;
+
+if (isset($_GET['edit'])) {
+    $editProduct = $productModel->getById((int)$_GET['edit']);
+}
 
 ?>
 
@@ -53,13 +58,15 @@ $products = $productModel->getAll();
     <a href="admin-orders.php">Orders</a>
     <a href="admin-users.php">Users</a>
     <a href="admin-coupons.php">Coupons</a>
+    <a href="reports.php">Reports</a>
+    <a href="shop.php">Shop</a>
 
-    <form method="POST" action="../Controller/test.php" style="display:inline;">
+    <form method="POST" action="../Controller/test.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>
 
-    <button class="darkBtn" onclick="toggleDark()">☾</button>
+    <button type="button" class="darkBtn" onclick="toggleDark()">☾</button>
   </nav>
 </header>
 
@@ -78,13 +85,38 @@ $products = $productModel->getAll();
       <input type="text" name="description" placeholder="Description" required>
       <input type="text" name="brand" placeholder="Brand" required>
       <input type="text" name="category" placeholder="Category" required>
-      <input type="number" name="price" placeholder="Price" required>
-      <input type="number" name="stock_count" placeholder="Stock" required>
+      <input type="number" name="price" placeholder="Price" step="0.01" min="0" required>
+      <input type="number" name="stock_count" placeholder="Stock" min="0" required>
       <input type="text" name="image" placeholder="Image Name / URL">
 
       <button type="submit" class="btn">Add Product</button>
     </form>
   </section>
+
+
+  <?php if ($editProduct): ?>
+    <section class="panel highlight-panel">
+      <h2>Edit Product</h2>
+
+      <form method="POST" action="../Controller/test.php" class="formGrid">
+        <input type="hidden" name="action" value="update_product">
+        <input type="hidden" name="product_id" value="<?php echo $editProduct['product_id']; ?>">
+
+        <input type="text" name="name" placeholder="Product Name" value="<?php echo htmlspecialchars($editProduct['name']); ?>" required>
+        <input type="text" name="description" placeholder="Description" value="<?php echo htmlspecialchars($editProduct['description']); ?>" required>
+        <input type="text" name="brand" placeholder="Brand" value="<?php echo htmlspecialchars($editProduct['brand']); ?>" required>
+        <input type="text" name="category" placeholder="Category" value="<?php echo htmlspecialchars($editProduct['category']); ?>" required>
+        <input type="number" step="0.01" min="0" name="price" placeholder="Price" value="<?php echo htmlspecialchars($editProduct['price']); ?>" required>
+        <input type="number" min="0" name="stock_count" placeholder="Stock" value="<?php echo htmlspecialchars($editProduct['stock_count']); ?>" required>
+        <input type="text" name="image" placeholder="Image URL" value="<?php echo htmlspecialchars($editProduct['image']); ?>">
+
+        <div class="action-row">
+          <button type="submit" class="btn">Save Changes</button>
+          <a href="admin-products.php" class="btn outline">Cancel Edit</a>
+        </div>
+      </form>
+    </section>
+  <?php endif; ?>
 
   <br>
 
@@ -114,13 +146,16 @@ $products = $productModel->getAll();
             <td>$<?php echo htmlspecialchars($product['price']); ?></td>
             <td><?php echo htmlspecialchars($product['stock_count']); ?></td>
             <td>
-              <a class="btn outline" href="product.php?id=<?php echo $product['product_id']; ?>">View</a>
+              <div class="table-actions">
+                <a class="btn outline" href="product.php?id=<?php echo $product['product_id']; ?>">View</a>
+                <a class="btn outline" href="admin-products.php?edit=<?php echo $product['product_id']; ?>">Edit</a>
 
-              <form method="POST" action="../Controller/test.php" style="display:inline;">
+                <form method="POST" action="../Controller/test.php" class="inline-form">
                 <input type="hidden" name="action" value="delete_product">
                 <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">
-                <button type="submit" class="btn outline">Delete</button>
-              </form>
+                  <button type="submit" class="btn outline danger">Delete</button>
+                </form>
+              </div>
             </td>
           </tr>
         <?php endforeach; ?>

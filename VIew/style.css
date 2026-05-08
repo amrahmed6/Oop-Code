@@ -348,3 +348,178 @@ tr:last-child td{border-bottom:0}
   .details img{height:360px}
   .filters{position:static}
 }
+
+/* ===============================
+   Final UI fixes
+   =============================== */
+.header nav form.inline-form{margin:0}
+.inline-form{display:inline-flex;align-items:center;gap:10px;margin:0}
+.action-row,.card-actions,.table-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.action-row{margin-top:14px}
+.productGrid .card,.grid .card{
+  display:flex;
+  flex-direction:column;
+  min-height:100%;
+}
+.card .btn,.card .inline-form{margin-top:8px}
+.card .inline-form .btn{margin-top:0}
+.card > a.btn{align-self:flex-start}
+.card p:last-of-type{margin-bottom:10px}
+.card b[style*="float:right"]{float:none!important;margin-left:8px}
+.btn:disabled,.darkBtn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+  transform:none!important;
+  box-shadow:none!important;
+}
+.btn.danger:hover{
+  border-color:#d32f2f;
+  background:#d32f2f;
+  color:#fff;
+}
+.highlight-panel{
+  margin-top:22px;
+  border-color:rgba(0,168,98,.35);
+  background:linear-gradient(180deg,var(--surface),var(--surface-2));
+}
+.formGrid input,.formGrid select,.formGrid textarea,
+.auth input,.panel input,.panel select{
+  min-height:48px;
+}
+.panel form:not(.inline-form) input,
+.panel form:not(.inline-form) select{
+  margin-bottom:12px;
+}
+.summary{
+  margin-top:22px;
+}
+.table-actions .btn,
+.table-actions select{
+  min-height:42px;
+  padding:10px 14px;
+  font-size:13px;
+}
+.table-actions select{width:auto;min-width:150px}
+.ok,.success-text{color:var(--accent);font-weight:800}
+.error{color:#d32f2f;font-weight:800}
+.price-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+@media(max-width:700px){
+  .container{width:min(94vw,1220px);padding-top:28px}
+  h1{font-size:36px;line-height:1.05}
+  .btn{width:100%;padding:13px 16px}
+  .card > a.btn,.card .inline-form,.card .inline-form .btn{width:100%}
+  .action-row,.card-actions,.table-actions{align-items:stretch;flex-direction:column}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+}
+
+
+/* ===============================
+   Auth + Policy page improvements
+   =============================== */
+.auth.panel{
+  max-width:560px;
+  padding:30px;
+  border-radius:28px;
+  box-shadow:0 20px 55px rgba(0,0,0,.08);
+}
+.auth form{margin:0}
+.auth .btn.auth-submit{
+  margin-top:8px;
+  width:100%;
+  min-height:54px;
+  border:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+  color:#fff;
+  font-size:16px;
+  letter-spacing:.01em;
+  box-shadow:0 14px 32px rgba(0,168,98,.24);
+}
+.auth .btn.auth-submit:hover{
+  transform:translateY(-2px);
+  box-shadow:0 18px 42px rgba(0,168,98,.32);
+}
+.policy-check,.remember-check{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  width:100%;
+  margin:4px 0 16px;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.55;
+}
+.remember-check{align-items:center;margin:0}
+.policy-check input,.remember-check input{
+  width:18px;
+  min-width:18px;
+  height:18px;
+  margin:2px 0 0;
+  accent-color:var(--accent);
+}
+.remember-check input{margin:0}
+.policy-check a,.auth-options a,.auth-switch a,.policy-card a{
+  color:var(--accent);
+  font-weight:900;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.auth-options{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin:2px 0 18px;
+  font-size:14px;
+}
+.auth-switch{
+  margin-top:18px;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  color:var(--muted);
+  font-size:14px;
+}
+.policy-hero{
+  border:1px solid var(--line);
+  border-radius:30px;
+  padding:44px;
+  background:linear-gradient(135deg,var(--surface),var(--surface-2));
+  box-shadow:var(--shadow);
+  margin-bottom:24px;
+}
+.policy-hero p{max-width:780px;margin-bottom:0}
+.policy-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:22px;
+}
+.policy-card{
+  border:1px solid var(--line);
+  background:var(--surface);
+  border-radius:24px;
+  padding:26px;
+  box-shadow:0 12px 30px rgba(0,0,0,.04);
+}
+.policy-card ul{margin:12px 0 0;padding-left:20px;color:var(--muted);line-height:1.7}
+.policy-card li{margin-bottom:8px}
+.policy-card.full-card{grid-column:1/-1}
+@media(max-width:700px){
+  .auth.panel{padding:22px;border-radius:22px}
+  .auth-options,.auth-switch{align-items:flex-start;flex-direction:column}
+  .auth-switch{align-items:center}
+  .policy-hero{padding:28px}
+  .policy-grid{grid-template-columns:1fr}
+}

@@ -3,10 +3,10 @@
 session_start();
 
 require_once __DIR__ . "/../Model/Database.php";
-require_once __DIR__ . "/../Model/Order.php";
-require_once __DIR__ . "/../Model/Payment.php";
-require_once __DIR__ . "/../Model/User.php";
-require_once __DIR__ . "/../Model/Customer.php";
+require_once __DIR__ . "/../Model/order.php";
+require_once __DIR__ . "/../Model/payment.php";
+require_once __DIR__ . "/../Model/user.php";
+require_once __DIR__ . "/../Model/customer.php";
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -91,7 +91,11 @@ function isActiveStep($currentStatus, $step) {
     <a href="orders.php">Orders</a>
     <a href="account.php">Account</a>
 
-    <form method="POST" action="../Controller/test.php" style="display:inline;">
+    <?php if (isset($_SESSION['role']) && $_SESSION['role'] == "admin"): ?>
+      <a href="admin.php">Admin</a>
+    <?php endif; ?>
+
+    <form method="POST" action="../Controller/test.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>

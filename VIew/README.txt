@@ -1,11 +1,16 @@
-BonnaVerse Front-End Website
+BonnaVerse E-commerce Project
 
-Open index.html in browser.
+Setup on XAMPP:
+1. Copy the whole project folder to C:\xampp\htdocs\Oop_Code_Fixed
+2. Start Apache and MySQL from XAMPP Control Panel.
+3. Open phpMyAdmin.
+4. Import View/Code.sql.
+5. Open: http://localhost/Oop_Code_Fixed/View/index.php
 
-Pages included:
-Home, Shop, Product Details, Wishlist, Cart, Checkout, Payment, Success,
-Login, Register, Forgot Password, Account, Orders, Tracking,
-Admin Dashboard, Product Management, Orders Management, Users Management,
-Coupons Management, Reports.
+Test accounts after importing Code.sql:
+- Admin: admin@bonnaverse.com / 123456
+- Customer: customer@bonnaverse.com / 123456
 
-Built with HTML + CSS + JavaScript only.
+Important:
+- Controller/test.php is only a temporary test controller.
+- The Model and View files were cleaned and aligned with the current class diagram.

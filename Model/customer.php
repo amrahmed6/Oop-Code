@@ -239,7 +239,9 @@ class Customer extends User {
 
     // Submit review
     public function submitReview($productId, $comment, $rating) {
-        if ($rating < 0 || $rating > 5) {
+        $rating = (float)$rating;
+
+        if ($rating < 1 || $rating > 5) {
             return false;
         }
 

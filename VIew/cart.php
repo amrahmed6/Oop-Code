@@ -47,7 +47,11 @@ $subtotal = $cart->getTotal();
     <a href="orders.php">Orders</a>
     <a href="account.php">Account</a>
 
-    <form method="POST" action="../Controller/test.php" style="display:inline;">
+    <?php if (isset($_SESSION['role']) && $_SESSION['role'] == "admin"): ?>
+      <a href="admin.php">Admin</a>
+    <?php endif; ?>
+
+    <form method="POST" action="../Controller/test.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>
@@ -79,7 +83,7 @@ $subtotal = $cart->getTotal();
           <p>Price: <b>$<?php echo htmlspecialchars($item['price']); ?></b></p>
           <p>Total: <b>$<?php echo htmlspecialchars($item['total']); ?></b></p>
 
-          <form method="POST" action="../Controller/test.php" style="display:inline;">
+          <form method="POST" action="../Controller/test.php" class="inline-form">
             <input type="hidden" name="action" value="update_cart_quantity">
             <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
             <input type="hidden" name="cart_item_id" value="<?php echo $item['cart_item_id']; ?>">
@@ -94,7 +98,7 @@ $subtotal = $cart->getTotal();
             <button type="submit" class="btn">Update</button>
           </form>
 
-          <form method="POST" action="../Controller/test.php" style="display:inline;">
+          <form method="POST" action="../Controller/test.php" class="inline-form">
             <input type="hidden" name="action" value="remove_cart_item">
             <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
             <input type="hidden" name="cart_item_id" value="<?php echo $item['cart_item_id']; ?>">

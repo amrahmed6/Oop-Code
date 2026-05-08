@@ -80,7 +80,11 @@ $address = $profile['delivery_address'] ?? "";
     <a href="orders.php">Orders</a>
     <a href="account.php">Account</a>
 
-    <form method="POST" action="../Controller/test.php" style="display:inline;">
+    <?php if (isset($_SESSION['role']) && $_SESSION['role'] == "admin"): ?>
+      <a href="admin.php">Admin</a>
+    <?php endif; ?>
+
+    <form method="POST" action="../Controller/test.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>

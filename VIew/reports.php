@@ -3,8 +3,8 @@
 session_start();
 
 require_once __DIR__ . "/../Model/Database.php";
-require_once __DIR__ . "/../Model/User.php";
-require_once __DIR__ . "/../Model/Admin.php";
+require_once __DIR__ . "/../Model/user.php";
+require_once __DIR__ . "/../Model/admin.php";
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -101,8 +101,9 @@ $orderStatuses = $statusStmt->fetchAll(PDO::FETCH_ASSOC);
     <a href="admin-users.php">Users</a>
     <a href="admin-coupons.php">Coupons</a>
     <a href="reports.php">Reports</a>
+    <a href="shop.php">Shop</a>
 
-    <form method="POST" action="../Controller/test.php" style="display:inline;">
+    <form method="POST" action="../Controller/test.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>

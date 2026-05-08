@@ -111,8 +111,10 @@ $lowStockProducts = $lowStockStmt->fetchAll(PDO::FETCH_ASSOC);
     <a href="admin-orders.php">Orders</a>
     <a href="admin-users.php">Users</a>
     <a href="admin-coupons.php">Coupons</a>
+    <a href="reports.php">Reports</a>
+    <a href="shop.php">Shop</a>
 
-    <form method="POST" action="../Controller/test.php" style="display:inline;">
+    <form method="POST" action="../Controller/test.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>

@@ -4,16 +4,16 @@ session_start();
 
 require_once __DIR__ . "/../Model/Database.php";
 
-require_once __DIR__ . "/../Model/User.php";
-require_once __DIR__ . "/../Model/Customer.php";
-require_once __DIR__ . "/../Model/Admin.php";
-require_once __DIR__ . "/../Model/Product.php";
-require_once __DIR__ . "/../Model/Cart.php";
-require_once __DIR__ . "/../Model/Order.php";
-require_once __DIR__ . "/../Model/Payment.php";
-require_once __DIR__ . "/../Model/Wishlist.php";
-require_once __DIR__ . "/../Model/Review.php";
-require_once __DIR__ . "/../Model/Coupon.php";
+require_once __DIR__ . "/../Model/user.php";
+require_once __DIR__ . "/../Model/customer.php";
+require_once __DIR__ . "/../Model/admin.php";
+require_once __DIR__ . "/../Model/product.php";
+require_once __DIR__ . "/../Model/cart.php";
+require_once __DIR__ . "/../Model/order.php";
+require_once __DIR__ . "/../Model/payment.php";
+require_once __DIR__ . "/../Model/wishlist.php";
+require_once __DIR__ . "/../Model/review.php";
+require_once __DIR__ . "/../Model/coupon.php";
 
 $database = new Database();
 $db = $database->connect();
