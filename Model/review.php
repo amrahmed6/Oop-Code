@@ -207,17 +207,19 @@ class Review {
                     average_rating = (
                         SELECT COALESCE(AVG(rating), 0)
                         FROM Review
-                        WHERE product_id = :product_id
+                        WHERE product_id = :product_id_avg
                     ),
                     review_count = (
                         SELECT COUNT(*)
                         FROM Review
-                        WHERE product_id = :product_id
+                        WHERE product_id = :product_id_count
                     )
-                  WHERE product_id = :product_id";
+                  WHERE product_id = :product_id_main";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":product_id", $productId, PDO::PARAM_INT);
+        $stmt->bindValue(":product_id_avg", (int)$productId, PDO::PARAM_INT);
+        $stmt->bindValue(":product_id_count", (int)$productId, PDO::PARAM_INT);
+        $stmt->bindValue(":product_id_main", (int)$productId, PDO::PARAM_INT);
 
         return $stmt->execute();
     }

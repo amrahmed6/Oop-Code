@@ -52,6 +52,8 @@ $name = $profile['name'] ?? "";
 $email = $profile['email'] ?? "";
 $phone = $profile['phone'] ?? "";
 $address = $profile['delivery_address'] ?? "";
+$orderError = $_SESSION['order_error'] ?? "";
+unset($_SESSION['order_error']);
 
 ?>
 
@@ -62,7 +64,7 @@ $address = $profile['delivery_address'] ?? "";
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Checkout | BonnaVerse</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260509_ui_tweak_v3" />
 </head>
 <body>
 
@@ -84,7 +86,7 @@ $address = $profile['delivery_address'] ?? "";
       <a href="admin.php">Admin</a>
     <?php endif; ?>
 
-    <form method="POST" action="../Controller/test.php" class="inline-form">
+    <form method="POST" action="../Controller/AuthController.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>
@@ -97,7 +99,11 @@ $address = $profile['delivery_address'] ?? "";
 
   <h1>Checkout</h1>
 
-  <form method="POST" action="../Controller/test.php">
+  <?php if (!empty($orderError)): ?>
+    <p class="error"><?php echo htmlspecialchars($orderError); ?></p>
+  <?php endif; ?>
+
+  <form method="POST" action="../Controller/OrderController.php">
 
     <input type="hidden" name="action" value="create_order">
     <input type="hidden" name="user_id" value="<?php echo $userId; ?>">

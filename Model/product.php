@@ -74,16 +74,19 @@ class Product {
     public function search($keyword) {
         $query = "SELECT *
                   FROM " . $this->table . "
-                  WHERE name LIKE :keyword
-                     OR description LIKE :keyword
-                     OR brand LIKE :keyword
-                     OR category LIKE :keyword
+                  WHERE name LIKE :keyword_name
+                     OR description LIKE :keyword_description
+                     OR brand LIKE :keyword_brand
+                     OR category LIKE :keyword_category
                   ORDER BY product_id DESC";
 
         $stmt = $this->conn->prepare($query);
 
         $searchKeyword = "%" . $keyword . "%";
-        $stmt->bindParam(":keyword", $searchKeyword);
+        $stmt->bindValue(":keyword_name", $searchKeyword);
+        $stmt->bindValue(":keyword_description", $searchKeyword);
+        $stmt->bindValue(":keyword_brand", $searchKeyword);
+        $stmt->bindValue(":keyword_category", $searchKeyword);
 
         $stmt->execute();
 
@@ -209,14 +212,15 @@ class Product {
         }
 
         $query = "UPDATE " . $this->table . "
-                  SET stock_count = stock_count - :quantity
+                  SET stock_count = stock_count - :quantity_remove
                   WHERE product_id = :product_id
-                  AND stock_count >= :quantity";
+                  AND stock_count >= :quantity_check";
 
         $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(":quantity", $quantity, PDO::PARAM_INT);
-        $stmt->bindParam(":product_id", $productId, PDO::PARAM_INT);
+        $stmt->bindValue(":quantity_remove", (int)$quantity, PDO::PARAM_INT);
+        $stmt->bindValue(":quantity_check", (int)$quantity, PDO::PARAM_INT);
+        $stmt->bindValue(":product_id", (int)$productId, PDO::PARAM_INT);
 
         $stmt->execute();
 

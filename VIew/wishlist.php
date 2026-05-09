@@ -27,7 +27,7 @@ $items = $wishlistModel->getByUserId($userId);
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wishlist | BonnaVerse</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260509_ui_tweak_v3" />
 </head>
 <body>
 
@@ -49,7 +49,7 @@ $items = $wishlistModel->getByUserId($userId);
       <a href="admin.php">Admin</a>
     <?php endif; ?>
 
-    <form method="POST" action="../Controller/test.php" class="inline-form">
+    <form method="POST" action="../Controller/AuthController.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>
@@ -104,7 +104,7 @@ $items = $wishlistModel->getByUserId($userId);
           </a>
 
           <?php if ($item['stock_count'] > 0): ?>
-            <form method="POST" action="../Controller/test.php" class="inline-form">
+            <form method="POST" action="../Controller/CartController.php" class="inline-form">
               <input type="hidden" name="action" value="add_to_cart">
               <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
               <input type="hidden" name="product_id" value="<?php echo $item['product_id']; ?>">
@@ -117,7 +117,7 @@ $items = $wishlistModel->getByUserId($userId);
             <button class="btn" disabled>Out of Stock</button>
           <?php endif; ?>
 
-          <form method="POST" action="../Controller/test.php" class="inline-form">
+          <form method="POST" action="../Controller/WishlistController.php" class="inline-form">
             <input type="hidden" name="action" value="remove_wishlist">
             <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
             <input type="hidden" name="product_id" value="<?php echo $item['product_id']; ?>">

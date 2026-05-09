@@ -45,7 +45,7 @@ $image = !empty($product['image'])
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><?php echo htmlspecialchars($product['name']); ?> | BonnaVerse</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260509_ui_tweak_v3" />
 </head>
 <body>
 
@@ -69,7 +69,7 @@ $image = !empty($product['image'])
       <a href="admin.php">Admin</a>
     <?php endif; ?>
 
-      <form method="POST" action="../Controller/test.php" class="inline-form">
+      <form method="POST" action="../Controller/AuthController.php" class="inline-form">
         <input type="hidden" name="action" value="logout">
         <button type="submit" class="darkBtn">Logout</button>
       </form>
@@ -124,7 +124,7 @@ $image = !empty($product['image'])
       <?php if ($isLoggedIn): ?>
 
         <?php if ($product['stock_count'] > 0): ?>
-          <form method="POST" action="../Controller/test.php" class="inline-form">
+          <form method="POST" action="../Controller/CartController.php" class="inline-form">
             <input type="hidden" name="action" value="add_to_cart">
             <input type="hidden" name="user_id" value="<?php echo $_SESSION['user_id']; ?>">
             <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">
@@ -137,7 +137,7 @@ $image = !empty($product['image'])
           <button class="btn" disabled>Out of Stock</button>
         <?php endif; ?>
 
-        <form method="POST" action="../Controller/test.php" class="inline-form">
+        <form method="POST" action="../Controller/WishlistController.php" class="inline-form">
           <input type="hidden" name="action" value="add_wishlist">
           <input type="hidden" name="user_id" value="<?php echo $_SESSION['user_id']; ?>">
           <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">
@@ -221,7 +221,7 @@ $image = !empty($product['image'])
 
       <h3>Add Review</h3>
 
-      <form method="POST" action="../Controller/test.php">
+      <form method="POST" action="../Controller/ReviewController.php">
         <input type="hidden" name="action" value="add_review">
         <input type="hidden" name="user_id" value="<?php echo $_SESSION['user_id']; ?>">
         <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">

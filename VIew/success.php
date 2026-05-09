@@ -35,6 +35,8 @@ $payment = $paymentModel->getByOrderId($orderId);
 
 $paymentStatus = $payment ? $payment['status'] : "Not Paid";
 $paymentMethod = $payment ? $payment['payment_method'] : "N/A";
+$paymentMessage = $_SESSION['payment_success'] ?? "";
+unset($_SESSION['payment_success']);
 
 ?>
 
@@ -45,7 +47,7 @@ $paymentMethod = $payment ? $payment['payment_method'] : "N/A";
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Order Success | BonnaVerse</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260509_ui_tweak_v3" />
 </head>
 <body>
 
@@ -67,7 +69,7 @@ $paymentMethod = $payment ? $payment['payment_method'] : "N/A";
       <a href="admin.php">Admin</a>
     <?php endif; ?>
 
-    <form method="POST" action="../Controller/test.php" class="inline-form">
+    <form method="POST" action="../Controller/AuthController.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>
@@ -79,7 +81,16 @@ $paymentMethod = $payment ? $payment['payment_method'] : "N/A";
 <main class="container">
 
   <section class="success">
-    <h1>Order Confirmed ✅</h1>
+    <?php if ($paymentStatus === "Pending"): ?>
+      <h1>Payment Under Review ⏳</h1>
+      <p class="ok">Your Instapay proof was uploaded. The admin will approve the order after confirming the money.</p>
+    <?php else: ?>
+      <h1>Order Confirmed ✅</h1>
+    <?php endif; ?>
+
+    <?php if (!empty($paymentMessage)): ?>
+      <p class="ok"><?php echo htmlspecialchars($paymentMessage); ?></p>
+    <?php endif; ?>
 
     <p>
       Order Number:

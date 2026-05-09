@@ -41,16 +41,12 @@ if (isset($_GET['edit'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Product Management | BonnaVerse</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260509_ui_tweak_v3" />
 </head>
 <body>
 
-<header class="header">
+<header class="header admin-header">
   <a class="logo" href="index.php">Bonna<span>Verse</span></a>
-
-  <div class="search">
-    <input id="searchInput" placeholder="Search sneakers, apparel, brands..." />
-  </div>
 
   <nav>
     <a href="admin.php">Dashboard</a>
@@ -61,7 +57,7 @@ if (isset($_GET['edit'])) {
     <a href="reports.php">Reports</a>
     <a href="shop.php">Shop</a>
 
-    <form method="POST" action="../Controller/test.php" class="inline-form">
+    <form method="POST" action="../Controller/AuthController.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>
@@ -77,7 +73,7 @@ if (isset($_GET['edit'])) {
   <section class="panel">
     <h2>Add Product</h2>
 
-    <form method="POST" action="../Controller/test.php" class="formGrid">
+    <form method="POST" action="../Controller/AdminController.php" class="formGrid">
       <input type="hidden" name="action" value="add_product">
       <input type="hidden" name="admin_id" value="<?php echo $adminId; ?>">
 
@@ -98,7 +94,7 @@ if (isset($_GET['edit'])) {
     <section class="panel highlight-panel">
       <h2>Edit Product</h2>
 
-      <form method="POST" action="../Controller/test.php" class="formGrid">
+      <form method="POST" action="../Controller/AdminController.php" class="formGrid">
         <input type="hidden" name="action" value="update_product">
         <input type="hidden" name="product_id" value="<?php echo $editProduct['product_id']; ?>">
 
@@ -150,7 +146,7 @@ if (isset($_GET['edit'])) {
                 <a class="btn outline" href="product.php?id=<?php echo $product['product_id']; ?>">View</a>
                 <a class="btn outline" href="admin-products.php?edit=<?php echo $product['product_id']; ?>">Edit</a>
 
-                <form method="POST" action="../Controller/test.php" class="inline-form">
+                <form method="POST" action="../Controller/AdminController.php" class="inline-form">
                 <input type="hidden" name="action" value="delete_product">
                 <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">
                   <button type="submit" class="btn outline danger">Delete</button>

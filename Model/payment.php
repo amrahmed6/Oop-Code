@@ -4,16 +4,58 @@ class Payment {
     private $conn;
     private $table = "Payment";
 
-    private $paymentId;
-    private $orderId;
-    private $amount;
-    private $paymentMethod;
-    private $transactionId;
-    private $status;
-    private $paymentDate;
-
     public function __construct($db) {
         $this->conn = $db;
+        $this->ensureInstapayTable();
+        $this->ensureVisaTable();
+    }
+
+    private function ensureInstapayTable() {
+        $query = "CREATE TABLE IF NOT EXISTS Instapay_Transfer (
+                    instapay_transfer_id INT AUTO_INCREMENT PRIMARY KEY,
+                    payment_id INT NOT NULL UNIQUE,
+                    order_id INT NOT NULL,
+                    sender_phone VARCHAR(30) NOT NULL,
+                    proof_image VARCHAR(255) NOT NULL,
+                    admin_status VARCHAR(50) DEFAULT 'Pending',
+                    admin_note TEXT NULL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    reviewed_at DATETIME NULL,
+                    reviewed_by INT NULL,
+                    FOREIGN KEY (payment_id) REFERENCES Payment(payment_id)
+                        ON DELETE CASCADE
+                        ON UPDATE CASCADE,
+                    FOREIGN KEY (order_id) REFERENCES Orders(order_id)
+                        ON DELETE CASCADE
+                        ON UPDATE CASCADE,
+                    FOREIGN KEY (reviewed_by) REFERENCES Admin(admin_id)
+                        ON DELETE SET NULL
+                        ON UPDATE CASCADE,
+                    INDEX idx_instapay_order (order_id),
+                    INDEX idx_instapay_status (admin_status)
+                  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+        $this->conn->exec($query);
+    }
+
+    private function ensureVisaTable() {
+        $query = "CREATE TABLE IF NOT EXISTS Visa_Payment_Details (
+                    visa_payment_id INT AUTO_INCREMENT PRIMARY KEY,
+                    payment_id INT NOT NULL UNIQUE,
+                    order_id INT NOT NULL,
+                    cardholder_name VARCHAR(120) NOT NULL,
+                    card_last4 VARCHAR(4) NOT NULL,
+                    expiry_month TINYINT NOT NULL,
+                    expiry_year SMALLINT NOT NULL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (payment_id) REFERENCES Payment(payment_id)
+                        ON DELETE CASCADE
+                        ON UPDATE CASCADE,
+                    FOREIGN KEY (order_id) REFERENCES Orders(order_id)
+                        ON DELETE CASCADE
+                        ON UPDATE CASCADE,
+                    INDEX idx_visa_order (order_id)
+                  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+        $this->conn->exec($query);
     }
 
     // Create payment for order
@@ -63,7 +105,73 @@ class Payment {
         $stmt->bindParam(":transaction_id", $transactionId);
         $stmt->bindParam(":status", $status);
 
+        if ($stmt->execute()) {
+            return $this->conn->lastInsertId();
+        }
+
+        return false;
+    }
+
+    // Create Instapay transfer proof row
+    public function createInstapayTransfer($paymentId, $orderId, $senderPhone, $proofImage) {
+        $query = "INSERT INTO Instapay_Transfer
+                  (payment_id, order_id, sender_phone, proof_image, admin_status, created_at)
+                  VALUES
+                  (:payment_id, :order_id, :sender_phone, :proof_image, 'Pending', NOW())";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":payment_id", $paymentId, PDO::PARAM_INT);
+        $stmt->bindParam(":order_id", $orderId, PDO::PARAM_INT);
+        $stmt->bindParam(":sender_phone", $senderPhone);
+        $stmt->bindParam(":proof_image", $proofImage);
+
         return $stmt->execute();
+    }
+
+    // Get Instapay transfer data by order id
+    public function getInstapayByOrderId($orderId) {
+        $query = "SELECT *
+                  FROM Instapay_Transfer
+                  WHERE order_id = :order_id
+                  LIMIT 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":order_id", $orderId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Save safe Visa payment details only. Full card number and CVV are not stored.
+    public function createVisaDetails($paymentId, $orderId, $cardholderName, $cardLast4, $expiryMonth, $expiryYear) {
+        $query = "INSERT INTO Visa_Payment_Details
+                  (payment_id, order_id, cardholder_name, card_last4, expiry_month, expiry_year, created_at)
+                  VALUES
+                  (:payment_id, :order_id, :cardholder_name, :card_last4, :expiry_month, :expiry_year, NOW())";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":payment_id", $paymentId, PDO::PARAM_INT);
+        $stmt->bindParam(":order_id", $orderId, PDO::PARAM_INT);
+        $stmt->bindParam(":cardholder_name", $cardholderName);
+        $stmt->bindParam(":card_last4", $cardLast4);
+        $stmt->bindParam(":expiry_month", $expiryMonth, PDO::PARAM_INT);
+        $stmt->bindParam(":expiry_year", $expiryYear, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    // Get Visa details by order id
+    public function getVisaByOrderId($orderId) {
+        $query = "SELECT *
+                  FROM Visa_Payment_Details
+                  WHERE order_id = :order_id
+                  LIMIT 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":order_id", $orderId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     // Get payment by payment id
@@ -123,6 +231,94 @@ class Payment {
         $stmt->bindParam(":payment_id", $paymentId, PDO::PARAM_INT);
 
         return $stmt->execute();
+    }
+
+    // Admin approves Instapay after confirming money was received
+    public function approveInstapay($paymentId, $adminId) {
+        try {
+            $this->conn->beginTransaction();
+
+            $payment = $this->getById($paymentId);
+            if (!$payment || $payment['payment_method'] !== 'Instapay') {
+                $this->conn->rollBack();
+                return false;
+            }
+
+            $updatePayment = "UPDATE Payment
+                              SET status = 'Completed'
+                              WHERE payment_id = :payment_id";
+            $stmt = $this->conn->prepare($updatePayment);
+            $stmt->bindParam(":payment_id", $paymentId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $updateProof = "UPDATE Instapay_Transfer
+                            SET admin_status = 'Approved', reviewed_at = NOW(), reviewed_by = :admin_id
+                            WHERE payment_id = :payment_id";
+            $stmt = $this->conn->prepare($updateProof);
+            $stmt->bindParam(":admin_id", $adminId, PDO::PARAM_INT);
+            $stmt->bindParam(":payment_id", $paymentId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $updateOrder = "UPDATE Orders
+                            SET status = 'Processing'
+                            WHERE order_id = :order_id";
+            $stmt = $this->conn->prepare($updateOrder);
+            $stmt->bindParam(":order_id", $payment['order_id'], PDO::PARAM_INT);
+            $stmt->execute();
+
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
+            return false;
+        }
+    }
+
+    // Admin rejects Instapay if transfer is not valid
+    public function rejectInstapay($paymentId, $adminId, $note = '') {
+        try {
+            $this->conn->beginTransaction();
+
+            $payment = $this->getById($paymentId);
+            if (!$payment || $payment['payment_method'] !== 'Instapay') {
+                $this->conn->rollBack();
+                return false;
+            }
+
+            $updatePayment = "UPDATE Payment
+                              SET status = 'Failed'
+                              WHERE payment_id = :payment_id";
+            $stmt = $this->conn->prepare($updatePayment);
+            $stmt->bindParam(":payment_id", $paymentId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $updateProof = "UPDATE Instapay_Transfer
+                            SET admin_status = 'Rejected', admin_note = :admin_note,
+                                reviewed_at = NOW(), reviewed_by = :admin_id
+                            WHERE payment_id = :payment_id";
+            $stmt = $this->conn->prepare($updateProof);
+            $stmt->bindParam(":admin_note", $note);
+            $stmt->bindParam(":admin_id", $adminId, PDO::PARAM_INT);
+            $stmt->bindParam(":payment_id", $paymentId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $updateOrder = "UPDATE Orders
+                            SET status = 'Payment Rejected'
+                            WHERE order_id = :order_id";
+            $stmt = $this->conn->prepare($updateOrder);
+            $stmt->bindParam(":order_id", $payment['order_id'], PDO::PARAM_INT);
+            $stmt->execute();
+
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
+            return false;
+        }
     }
 
     // Update payment method

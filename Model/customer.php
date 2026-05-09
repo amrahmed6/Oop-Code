@@ -265,19 +265,21 @@ class Customer extends User {
             $updateProductQuery = "UPDATE Product
                                    SET 
                                      average_rating = (
-                                        SELECT AVG(rating)
+                                        SELECT COALESCE(AVG(rating), 0)
                                         FROM Review
-                                        WHERE product_id = :product_id
+                                        WHERE product_id = :product_id_avg
                                      ),
                                      review_count = (
                                         SELECT COUNT(*)
                                         FROM Review
-                                        WHERE product_id = :product_id
+                                        WHERE product_id = :product_id_count
                                      )
-                                   WHERE product_id = :product_id";
+                                   WHERE product_id = :product_id_main";
 
             $updateStmt = $this->conn->prepare($updateProductQuery);
-            $updateStmt->bindParam(":product_id", $productId, PDO::PARAM_INT);
+            $updateStmt->bindValue(":product_id_avg", (int)$productId, PDO::PARAM_INT);
+            $updateStmt->bindValue(":product_id_count", (int)$productId, PDO::PARAM_INT);
+            $updateStmt->bindValue(":product_id_main", (int)$productId, PDO::PARAM_INT);
             $updateStmt->execute();
 
             $this->conn->commit();

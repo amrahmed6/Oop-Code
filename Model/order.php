@@ -3,6 +3,7 @@
 class Order {
     private $conn;
     private $table = "Orders";
+    private $lastError = "";
 
     private $orderId;
     private $userId;
@@ -21,34 +22,142 @@ class Order {
         $this->userId = $userId;
     }
 
+    public function getLastError() {
+        return $this->lastError;
+    }
+
+    private function setLastError($message) {
+        $this->lastError = $message;
+    }
+
+    private function ensureCustomerRecord() {
+        $checkQuery = "SELECT customer_id FROM Customer WHERE customer_id = :user_id LIMIT 1";
+        $checkStmt = $this->conn->prepare($checkQuery);
+        $checkStmt->bindParam(":user_id", $this->userId, PDO::PARAM_INT);
+        $checkStmt->execute();
+
+        if ($checkStmt->fetch(PDO::FETCH_ASSOC)) {
+            return true;
+        }
+
+        $userQuery = "SELECT user_id, first_name, last_name FROM Users WHERE user_id = :user_id LIMIT 1";
+        $userStmt = $this->conn->prepare($userQuery);
+        $userStmt->bindParam(":user_id", $this->userId, PDO::PARAM_INT);
+        $userStmt->execute();
+        $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$user) {
+            $this->setLastError("User account was not found.");
+            return false;
+        }
+
+        $name = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
+        if ($name === '') {
+            $name = 'Customer';
+        }
+
+        $insertQuery = "INSERT INTO Customer (customer_id, name, delivery_address, account_status)
+                        VALUES (:customer_id, :name, '', TRUE)";
+        $insertStmt = $this->conn->prepare($insertQuery);
+        $insertStmt->bindParam(":customer_id", $this->userId, PDO::PARAM_INT);
+        $insertStmt->bindParam(":name", $name);
+        return $insertStmt->execute();
+    }
+
+    private function findCartId($sessionId = null) {
+        // First try a logged-in cart that actually has items.
+        $cartQuery = "SELECT c.cart_id
+                      FROM Cart c
+                      INNER JOIN Cart_Item ci ON ci.cart_id = c.cart_id
+                      WHERE c.user_id = :user_id
+                      GROUP BY c.cart_id
+                      ORDER BY c.cart_id DESC
+                      LIMIT 1";
+        $cartStmt = $this->conn->prepare($cartQuery);
+        $cartStmt->bindParam(":user_id", $this->userId, PDO::PARAM_INT);
+        $cartStmt->execute();
+        $cart = $cartStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($cart) {
+            return $cart['cart_id'];
+        }
+
+        // If the product was added before login, attach the session cart to this user.
+        if (!empty($sessionId)) {
+            $guestCartQuery = "SELECT c.cart_id
+                               FROM Cart c
+                               INNER JOIN Cart_Item ci ON ci.cart_id = c.cart_id
+                               WHERE c.session_id = :session_id
+                               GROUP BY c.cart_id
+                               ORDER BY c.cart_id DESC
+                               LIMIT 1";
+            $guestCartStmt = $this->conn->prepare($guestCartQuery);
+            $guestCartStmt->bindParam(":session_id", $sessionId);
+            $guestCartStmt->execute();
+            $guestCart = $guestCartStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($guestCart) {
+                $updateCartQuery = "UPDATE Cart
+                                    SET user_id = :user_id
+                                    WHERE cart_id = :cart_id";
+                $updateCartStmt = $this->conn->prepare($updateCartQuery);
+                $updateCartStmt->bindParam(":user_id", $this->userId, PDO::PARAM_INT);
+                $updateCartStmt->bindParam(":cart_id", $guestCart['cart_id'], PDO::PARAM_INT);
+                $updateCartStmt->execute();
+
+                return $guestCart['cart_id'];
+            }
+        }
+
+        // Finally, return any account cart. createOrder() will show "cart is empty" if it has no items.
+        $emptyCartQuery = "SELECT cart_id
+                           FROM Cart
+                           WHERE user_id = :user_id
+                           ORDER BY cart_id DESC
+                           LIMIT 1";
+        $emptyCartStmt = $this->conn->prepare($emptyCartQuery);
+        $emptyCartStmt->bindParam(":user_id", $this->userId, PDO::PARAM_INT);
+        $emptyCartStmt->execute();
+        $emptyCart = $emptyCartStmt->fetch(PDO::FETCH_ASSOC);
+
+        return $emptyCart ? $emptyCart['cart_id'] : false;
+    }
+
     // Create order from cart
-    public function createOrder($shippingCost = 0, $couponCode = null) {
+    public function createOrder($shippingCost = 0, $couponCode = null, $sessionId = null) {
+        $this->lastError = "";
+        $shippingCost = (float)$shippingCost;
+
+        if (empty($this->userId)) {
+            $this->setLastError("You must login before placing an order.");
+            return false;
+        }
+
         try {
             $this->conn->beginTransaction();
 
-            // Get customer cart
-            $cartQuery = "SELECT cart_id 
-                          FROM Cart 
-                          WHERE user_id = :user_id 
-                          LIMIT 1";
-
-            $cartStmt = $this->conn->prepare($cartQuery);
-            $cartStmt->bindParam(":user_id", $this->userId, PDO::PARAM_INT);
-            $cartStmt->execute();
-
-            if ($cartStmt->rowCount() == 0) {
+            if (!$this->ensureCustomerRecord()) {
                 $this->conn->rollBack();
+                if ($this->lastError === "") {
+                    $this->setLastError("Customer profile could not be created.");
+                }
                 return false;
             }
 
-            $cart = $cartStmt->fetch(PDO::FETCH_ASSOC);
-            $cartId = $cart['cart_id'];
+            $cartId = $this->findCartId($sessionId);
+
+            if (!$cartId) {
+                $this->conn->rollBack();
+                $this->setLastError("No cart found for this account.");
+                return false;
+            }
 
             // Get cart items
             $itemsQuery = "SELECT 
                             ci.product_id,
                             ci.quantity,
                             ci.price,
+                            p.name,
                             p.stock_count
                            FROM Cart_Item ci
                            INNER JOIN Product p ON ci.product_id = p.product_id
@@ -62,6 +171,7 @@ class Order {
 
             if (empty($items)) {
                 $this->conn->rollBack();
+                $this->setLastError("Your cart is empty.");
                 return false;
             }
 
@@ -69,12 +179,13 @@ class Order {
             $subtotal = 0;
 
             foreach ($items as $item) {
-                if ($item['stock_count'] < $item['quantity']) {
+                if ((int)$item['stock_count'] < (int)$item['quantity']) {
                     $this->conn->rollBack();
+                    $this->setLastError("Not enough stock for " . $item['name'] . ".");
                     return false;
                 }
 
-                $subtotal += $item['quantity'] * $item['price'];
+                $subtotal += ((int)$item['quantity'] * (float)$item['price']);
             }
 
             // Apply coupon if exists
@@ -96,7 +207,7 @@ class Order {
                     $coupon = $couponStmt->fetch(PDO::FETCH_ASSOC);
 
                     $couponId = $coupon['coupon_id'];
-                    $discountAmount = ($subtotal * $coupon['discount']) / 100;
+                    $discountAmount = ($subtotal * (float)$coupon['discount']) / 100;
                 }
             }
 
@@ -118,7 +229,11 @@ class Order {
             $orderStmt->bindParam(":discount", $discountAmount);
             $orderStmt->bindParam(":shipping_cost", $shippingCost);
             $orderStmt->bindParam(":tracking_number", $trackingNumber);
-            $orderStmt->bindParam(":coupon_id", $couponId);
+            if ($couponId === null) {
+                $orderStmt->bindValue(":coupon_id", null, PDO::PARAM_NULL);
+            } else {
+                $orderStmt->bindValue(":coupon_id", $couponId, PDO::PARAM_INT);
+            }
 
             $orderStmt->execute();
 
@@ -126,7 +241,7 @@ class Order {
 
             // Insert order items and update stock
             foreach ($items as $item) {
-                $itemTotal = $item['quantity'] * $item['price'];
+                $itemTotal = ((int)$item['quantity'] * (float)$item['price']);
 
                 $orderItemQuery = "INSERT INTO Order_Item
                                    (order_id, product_id, quantity, unit_price, total)
@@ -144,19 +259,21 @@ class Order {
                 $orderItemStmt->execute();
 
                 $stockQuery = "UPDATE Product
-                               SET stock_count = stock_count - :quantity
+                               SET stock_count = stock_count - :quantity_remove
                                WHERE product_id = :product_id
-                               AND stock_count >= :quantity";
+                               AND stock_count >= :quantity_check";
 
                 $stockStmt = $this->conn->prepare($stockQuery);
 
-                $stockStmt->bindParam(":quantity", $item['quantity'], PDO::PARAM_INT);
-                $stockStmt->bindParam(":product_id", $item['product_id'], PDO::PARAM_INT);
+                $stockStmt->bindValue(":quantity_remove", (int)$item['quantity'], PDO::PARAM_INT);
+                $stockStmt->bindValue(":quantity_check", (int)$item['quantity'], PDO::PARAM_INT);
+                $stockStmt->bindValue(":product_id", (int)$item['product_id'], PDO::PARAM_INT);
 
                 $stockStmt->execute();
 
                 if ($stockStmt->rowCount() == 0) {
                     $this->conn->rollBack();
+                    $this->setLastError("Stock update failed for one product.");
                     return false;
                 }
             }
@@ -174,7 +291,10 @@ class Order {
             return $orderId;
 
         } catch (Exception $e) {
-            $this->conn->rollBack();
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
+            $this->setLastError($e->getMessage());
             return false;
         }
     }
@@ -307,14 +427,16 @@ class Order {
             return true;
 
         } catch (Exception $e) {
-            $this->conn->rollBack();
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
             return false;
         }
     }
 
     // Admin can update order status
     public function updateStatus($orderId, $status) {
-        $allowedStatus = ["Processing", "Shipped", "Delivered", "Cancelled"];
+        $allowedStatus = ["Pending Payment", "Payment Rejected", "Processing", "Shipped", "Delivered", "Cancelled"];
 
         if (!in_array($status, $allowedStatus)) {
             return false;

@@ -49,16 +49,12 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Users Management | BonnaVerse</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260509_ui_tweak_v3" />
 </head>
 <body>
 
-<header class="header">
+<header class="header admin-header">
   <a class="logo" href="index.php">Bonna<span>Verse</span></a>
-
-  <div class="search">
-    <input id="searchInput" placeholder="Search sneakers, apparel, brands..." />
-  </div>
 
   <nav>
     <a href="admin.php">Dashboard</a>
@@ -69,7 +65,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <a href="reports.php">Reports</a>
     <a href="shop.php">Shop</a>
 
-    <form method="POST" action="../Controller/test.php" class="inline-form">
+    <form method="POST" action="../Controller/AuthController.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>
@@ -135,13 +131,13 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <?php if ($role == "Customer"): ?>
 
                 <?php if ($status == "Active"): ?>
-                  <form method="POST" action="../Controller/test.php" class="inline-form">
+                  <form method="POST" action="../Controller/AdminController.php" class="inline-form">
                     <input type="hidden" name="action" value="block_user">
                     <input type="hidden" name="user_id" value="<?php echo $user['user_id']; ?>">
                     <button type="submit" class="btn outline">Block</button>
                   </form>
                 <?php else: ?>
-                  <form method="POST" action="../Controller/test.php" class="inline-form">
+                  <form method="POST" action="../Controller/AdminController.php" class="inline-form">
                     <input type="hidden" name="action" value="unblock_user">
                     <input type="hidden" name="user_id" value="<?php echo $user['user_id']; ?>">
                     <button type="submit" class="btn outline">Unblock</button>
@@ -151,7 +147,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <?php endif; ?>
 
               <?php if ($user['user_id'] != $adminId): ?>
-                <form method="POST" action="../Controller/test.php" class="inline-form">
+                <form method="POST" action="../Controller/AdminController.php" class="inline-form">
                   <input type="hidden" name="action" value="delete_user">
                   <input type="hidden" name="user_id" value="<?php echo $user['user_id']; ?>">
                   <button type="submit" class="btn outline">Delete</button>

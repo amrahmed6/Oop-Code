@@ -17,6 +17,8 @@ $userId = $_SESSION['user_id'];
 
 $orderModel = new Order($db, $userId);
 $orders = $orderModel->getUserOrders();
+$orderError = $_SESSION['order_error'] ?? "";
+unset($_SESSION['order_error']);
 
 ?>
 
@@ -27,7 +29,7 @@ $orders = $orderModel->getUserOrders();
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Orders | BonnaVerse</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260509_ui_tweak_v3" />
 </head>
 <body>
 
@@ -49,7 +51,7 @@ $orders = $orderModel->getUserOrders();
       <a href="admin.php">Admin</a>
     <?php endif; ?>
 
-    <form method="POST" action="../Controller/test.php" class="inline-form">
+    <form method="POST" action="../Controller/AuthController.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>
@@ -61,6 +63,10 @@ $orders = $orderModel->getUserOrders();
 <main class="container">
 
   <h1>My Orders</h1>
+
+  <?php if (!empty($orderError)): ?>
+    <p class="error"><?php echo htmlspecialchars($orderError); ?></p>
+  <?php endif; ?>
 
   <section class="panel">
     <table>
@@ -102,7 +108,7 @@ $orders = $orderModel->getUserOrders();
               </a>
 
               <?php if ($order['status'] == "Processing"): ?>
-                <form method="POST" action="../Controller/test.php" class="inline-form">
+                <form method="POST" action="../Controller/OrderController.php" class="inline-form">
                   <input type="hidden" name="action" value="cancel_order">
                   <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
                   <input type="hidden" name="order_id" value="<?php echo $order['order_id']; ?>">

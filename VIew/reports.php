@@ -83,16 +83,12 @@ $orderStatuses = $statusStmt->fetchAll(PDO::FETCH_ASSOC);
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reports | BonnaVerse</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260509_ui_tweak_v3" />
 </head>
 <body>
 
-<header class="header">
+<header class="header admin-header">
   <a class="logo" href="index.php">Bonna<span>Verse</span></a>
-
-  <div class="search">
-    <input id="searchInput" placeholder="Search sneakers, apparel, brands..." />
-  </div>
 
   <nav>
     <a href="admin.php">Dashboard</a>
@@ -103,7 +99,7 @@ $orderStatuses = $statusStmt->fetchAll(PDO::FETCH_ASSOC);
     <a href="reports.php">Reports</a>
     <a href="shop.php">Shop</a>
 
-    <form method="POST" action="../Controller/test.php" class="inline-form">
+    <form method="POST" action="../Controller/AuthController.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>

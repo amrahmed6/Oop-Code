@@ -36,16 +36,12 @@ $coupons = $couponModel->getAll();
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Coupons Management | BonnaVerse</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260509_ui_tweak_v3" />
 </head>
 <body>
 
-<header class="header">
+<header class="header admin-header">
   <a class="logo" href="index.php">Bonna<span>Verse</span></a>
-
-  <div class="search">
-    <input id="searchInput" placeholder="Search sneakers, apparel, brands..." />
-  </div>
 
   <nav>
     <a href="admin.php">Dashboard</a>
@@ -56,7 +52,7 @@ $coupons = $couponModel->getAll();
     <a href="reports.php">Reports</a>
     <a href="shop.php">Shop</a>
 
-    <form method="POST" action="../Controller/test.php" class="inline-form">
+    <form method="POST" action="../Controller/AuthController.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>
@@ -72,7 +68,7 @@ $coupons = $couponModel->getAll();
   <section class="panel">
     <h2>Create Coupon</h2>
 
-    <form method="POST" action="../Controller/test.php" class="formGrid">
+    <form method="POST" action="../Controller/AdminController.php" class="formGrid">
       <input type="hidden" name="action" value="create_coupon">
       <input type="hidden" name="admin_id" value="<?php echo $adminId; ?>">
 
@@ -106,7 +102,7 @@ $coupons = $couponModel->getAll();
             <td><?php echo htmlspecialchars($coupon['discount']); ?>%</td>
             <td><?php echo htmlspecialchars($coupon['expiry_date']); ?></td>
             <td>
-              <form method="POST" action="../Controller/test.php" class="inline-form">
+              <form method="POST" action="../Controller/AdminController.php" class="inline-form">
                 <input type="hidden" name="action" value="delete_coupon">
                 <input type="hidden" name="coupon_id" value="<?php echo $coupon['coupon_id']; ?>">
                 <button type="submit" class="btn outline">Delete</button>

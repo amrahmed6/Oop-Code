@@ -12,5 +12,6 @@ Test accounts after importing Code.sql:
 - Customer: customer@bonnaverse.com / 123456
 
 Important:
-- Controller/test.php is only a temporary test controller.
+- Controller/test.php was removed.
+- Each form now posts directly to the correct controller file, such as AuthController.php, CartController.php, AdminController.php, OrderController.php, and PaymentController.php.
 - The Model and View files were cleaned and aligned with the current class diagram.

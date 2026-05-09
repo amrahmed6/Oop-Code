@@ -38,7 +38,7 @@ $address = $profile['delivery_address'] ?? "No saved address";
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Account | BonnaVerse</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260509_ui_tweak_v3" />
 </head>
 <body>
 
@@ -59,7 +59,7 @@ $address = $profile['delivery_address'] ?? "No saved address";
     <?php if (isset($_SESSION['role']) && $_SESSION['role'] == "admin"): ?>
       <a href="admin.php">Admin</a>
     <?php endif; ?>
-     <form method="POST" action="../Controller/test.php" class="inline-form">
+     <form method="POST" action="../Controller/AuthController.php" class="inline-form">
       <input type="hidden" name="action" value="logout">
       <button type="submit" class="darkBtn">Logout</button>
     </form>
@@ -76,7 +76,7 @@ $address = $profile['delivery_address'] ?? "No saved address";
     <section class="panel">
       <h2>Personal Info</h2>
 
-      <form method="POST" action="../Controller/test.php">
+      <form method="POST" action="../Controller/AccountController.php">
         <input type="hidden" name="action" value="update_profile">
         <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
 
@@ -109,7 +109,7 @@ $address = $profile['delivery_address'] ?? "No saved address";
     <section class="panel">
       <h2>Saved Address</h2>
 
-      <form method="POST" action="../Controller/test.php">
+      <form method="POST" action="../Controller/AccountController.php">
         <input type="hidden" name="action" value="update_address">
         <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
 
@@ -125,7 +125,7 @@ $address = $profile['delivery_address'] ?? "No saved address";
 
       <br>
 
-      <form method="POST" action="../Controller/test.php">
+      <form method="POST" action="../Controller/AccountController.php">
         <input type="hidden" name="action" value="change_password">
         <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
 

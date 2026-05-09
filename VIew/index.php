@@ -24,7 +24,7 @@ $isLoggedIn = isset($_SESSION['user_id']);
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Home | BonnaVerse</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260509_ui_tweak_v3" />
 </head>
 <body>
 
@@ -48,7 +48,7 @@ $isLoggedIn = isset($_SESSION['user_id']);
       <a href="admin.php">Admin</a>
     <?php endif; ?>
 
-      <form method="POST" action="../Controller/test.php" class="inline-form">
+      <form method="POST" action="../Controller/AuthController.php" class="inline-form">
         <input type="hidden" name="action" value="logout">
         <button type="submit" class="darkBtn">Logout</button>
       </form>
@@ -107,7 +107,7 @@ $isLoggedIn = isset($_SESSION['user_id']);
           </a>
 
           <?php if ($isLoggedIn && $product['stock_count'] > 0): ?>
-            <form method="POST" action="../Controller/test.php" class="inline-form">
+            <form method="POST" action="../Controller/CartController.php" class="inline-form">
               <input type="hidden" name="action" value="add_to_cart">
               <input type="hidden" name="user_id" value="<?php echo $_SESSION['user_id']; ?>">
               <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">
